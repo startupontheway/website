@@ -71,7 +71,7 @@ function ServicePage() {
           <div className="mt-10 rounded-2xl border border-border bg-card p-8 shadow-card md:p-10">
             <p className="eyebrow">Our process</p>
             <ol className="mt-5 space-y-4">
-              {service.process.map((p, i) => (
+              {service.process.map((p: string, i: number) => (
                 <li key={p} className="flex items-start gap-4">
                   <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-foreground text-xs text-background">
                     {i + 1}
