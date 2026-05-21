@@ -51,7 +51,9 @@ function ContactPage() {
       <section className="mx-auto max-w-7xl px-6 pt-20 pb-12 md:px-10 md:pt-28">
         <Reveal>
           <p className="eyebrow">Contact</p>
-          <h1 className="h-display mt-3 max-w-3xl text-5xl text-ink md:text-6xl">Let's talk about your business.</h1>
+          <h1 className="h-display mt-3 max-w-3xl text-5xl text-ink md:text-6xl">
+            Let's talk about your business.
+          </h1>
           <p className="mt-5 max-w-2xl text-muted-foreground">
             Tell us where you're at. We'll map out the next steps in a free 30-minute call.
           </p>
@@ -82,15 +84,17 @@ function ContactPage() {
                   className="w-full rounded-md border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                 />
               </Field>
-              <Field label="Phone">
+              <Field label="Phone" required>
                 <input
+                  required
                   value={form.phone}
                   onChange={(e) => setForm({ ...form, phone: e.target.value })}
                   className="w-full rounded-md border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                 />
               </Field>
-              <Field label="Service of interest">
+              <Field label="Service of interest" required>
                 <select
+                  required
                   value={form.service}
                   onChange={(e) => setForm({ ...form, service: e.target.value })}
                   className="w-full rounded-md border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
@@ -105,8 +109,9 @@ function ContactPage() {
               </Field>
             </div>
             <div className="mt-5">
-              <Field label="How can we help?">
+              <Field label="How can we help?" required>
                 <textarea
+                  required
                   rows={5}
                   value={form.message}
                   onChange={(e) => setForm({ ...form, message: e.target.value })}
@@ -128,9 +133,15 @@ function ContactPage() {
           <aside className="rounded-2xl border border-border bg-card p-8 shadow-card">
             <p className="eyebrow">Reach us</p>
             <ul className="mt-5 space-y-4 text-sm">
-              <li className="flex items-start gap-3"><Mail className="mt-0.5 h-4 w-4 text-primary" /> hello@startupontheway.com</li>
-              <li className="flex items-start gap-3"><Phone className="mt-0.5 h-4 w-4 text-primary" /> +91 90000 00000</li>
-              <li className="flex items-start gap-3"><MapPin className="mt-0.5 h-4 w-4 text-primary" /> Bengaluru · Mumbai · Delhi</li>
+              <li className="flex items-start gap-3">
+                <Mail className="mt-0.5 h-4 w-4 text-primary" /> hello@startupontheway.com
+              </li>
+              <li className="flex items-start gap-3">
+                <Phone className="mt-0.5 h-4 w-4 text-primary" /> +91 90000 00000
+              </li>
+              <li className="flex items-start gap-3">
+                <MapPin className="mt-0.5 h-4 w-4 text-primary" /> Bengaluru · Mumbai · Delhi
+              </li>
             </ul>
             <div className="mt-8 border-t border-border pt-6 text-sm text-muted-foreground">
               We respond within one business day. For urgent compliance matters, call directly.
@@ -143,7 +154,15 @@ function ContactPage() {
   );
 }
 
-function Field({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
+function Field({
+  label,
+  required,
+  children,
+}: {
+  label: string;
+  required?: boolean;
+  children: React.ReactNode;
+}) {
   return (
     <label className="block">
       <span className="mb-1.5 block text-xs font-medium text-foreground">

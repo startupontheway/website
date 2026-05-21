@@ -7,7 +7,10 @@ export const Route = createFileRoute("/about")({
   head: () => ({
     meta: [
       { title: "About — StartUpOnTheWay" },
-      { name: "description", content: "We're a studio of senior CAs, CSs and lawyers helping founders launch and scale." },
+      {
+        name: "description",
+        content: "We're a studio of senior CAs, CSs and lawyers helping founders launch and scale.",
+      },
       { property: "og:title", content: "About — StartUpOnTheWay" },
       { property: "og:description", content: "Our story, our team, our principles." },
     ],
@@ -17,9 +20,18 @@ export const Route = createFileRoute("/about")({
 });
 
 const principles = [
-  { title: "Founder-first", body: "Plain language, real timelines, transparent pricing — built for the people doing the building." },
-  { title: "Senior on every file", body: "No call-center handoffs. A senior advisor owns your engagement from day one." },
-  { title: "Built to scale with you", body: "Compliance calendars, document repositories and review cycles as you grow." },
+  {
+    title: "Founder-first",
+    body: "Plain language, real timelines, transparent pricing — built for the people doing the building.",
+  },
+  {
+    title: "Senior on every file",
+    body: "No call-center handoffs. A senior advisor owns your engagement from day one.",
+  },
+  {
+    title: "Built to scale with you",
+    body: "Compliance calendars, document repositories and review cycles as you grow.",
+  },
 ];
 
 function AboutPage() {
@@ -33,9 +45,10 @@ function AboutPage() {
             A studio for startup registration, compliance and legal advisory.
           </h1>
           <p className="mt-6 max-w-2xl text-lg text-muted-foreground">
-            We started StartUpOnTheWay because founders deserve better than templated portals and call-center scripts.
-            We pair every client with senior CAs, CSs and lawyers — and we deliver work the way modern teams actually
-            work: fast, transparent, and beautifully organized.
+            We started StartUpOnTheWay because founders deserve better than templated portals and
+            call-center scripts. We pair every client with senior CAs, CSs and lawyers — and we
+            deliver work the way modern teams actually work: fast, transparent, and beautifully
+            organized.
           </p>
         </Reveal>
       </section>
@@ -57,7 +70,9 @@ function AboutPage() {
       <section className="mx-auto max-w-4xl px-6 pb-32 md:px-10">
         <Reveal>
           <div className="rounded-3xl border border-border bg-foreground px-8 py-14 text-background md:px-14">
-            <h2 className="h-display text-3xl md:text-4xl">Let's talk about what you're building.</h2>
+            <h2 className="h-display text-3xl md:text-4xl">
+              Let's talk about what you're building.
+            </h2>
             <Link
               to="/contact"
               className="mt-6 inline-block rounded-full bg-background px-5 py-3 text-sm font-medium text-foreground"

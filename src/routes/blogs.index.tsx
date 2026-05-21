@@ -10,7 +10,10 @@ export const Route = createFileRoute("/blogs/")({
   head: () => ({
     meta: [
       { title: "Blog — StartUpOnTheWay" },
-      { name: "description", content: "Editorial guides on startup incorporation, compliance and legal documentation." },
+      {
+        name: "description",
+        content: "Editorial guides on startup incorporation, compliance and legal documentation.",
+      },
       { property: "og:title", content: "Blog — StartUpOnTheWay" },
       { property: "og:description", content: "Editorial guides for founders." },
     ],
@@ -79,13 +82,20 @@ function BlogsPage() {
                 >
                   <div className="aspect-[4/3] overflow-hidden rounded-2xl bg-muted">
                     {featured.thumbnail_url && (
-                      <img src={featured.thumbnail_url} alt={featured.title} loading="lazy" className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.02]" />
+                      <img
+                        src={featured.thumbnail_url}
+                        alt={featured.title}
+                        loading="lazy"
+                        className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.02]"
+                      />
                     )}
                   </div>
                   <div className="flex flex-col justify-center">
                     <p className="eyebrow">Featured</p>
                     <h2 className="h-display mt-3 text-3xl md:text-4xl">{featured.title}</h2>
-                    {featured.excerpt && <p className="mt-4 text-muted-foreground">{featured.excerpt}</p>}
+                    {featured.excerpt && (
+                      <p className="mt-4 text-muted-foreground">{featured.excerpt}</p>
+                    )}
                     <span className="mt-6 text-sm font-medium text-primary">Read article →</span>
                   </div>
                 </Link>
@@ -102,13 +112,24 @@ function BlogsPage() {
                   >
                     <div className="aspect-[16/10] overflow-hidden bg-muted">
                       {b.thumbnail_url && (
-                        <img src={b.thumbnail_url} alt={b.title} loading="lazy" className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.03]" />
+                        <img
+                          src={b.thumbnail_url}
+                          alt={b.title}
+                          loading="lazy"
+                          className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
+                        />
                       )}
                     </div>
                     <div className="flex flex-1 flex-col p-6">
-                      {b.categories && <p className="eyebrow">{(b.categories as { name: string }).name}</p>}
+                      {b.categories && (
+                        <p className="eyebrow">{(b.categories as { name: string }).name}</p>
+                      )}
                       <h3 className="h-display mt-2 text-xl">{b.title}</h3>
-                      {b.excerpt && <p className="mt-2 line-clamp-3 text-sm text-muted-foreground">{b.excerpt}</p>}
+                      {b.excerpt && (
+                        <p className="mt-2 line-clamp-3 text-sm text-muted-foreground">
+                          {b.excerpt}
+                        </p>
+                      )}
                     </div>
                   </Link>
                 </Reveal>
