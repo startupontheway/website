@@ -69,16 +69,32 @@ function AboutPage() {
 
       <section className="mx-auto max-w-4xl px-6 pb-32 md:px-10">
         <Reveal>
-          <div className="rounded-3xl border border-border bg-foreground px-8 py-14 text-background md:px-14">
-            <h2 className="h-display text-3xl md:text-4xl">
+          <div className="relative overflow-hidden rounded-3xl border border-primary/20 bg-gradient-to-br from-card via-card/50 to-surface px-8 py-14 text-foreground md:px-14 shadow-2xl backdrop-blur-sm">
+            {/* Dynamic ambient inner glow portals */}
+            <div className="absolute -top-24 -left-24 h-48 w-48 rounded-full bg-primary/15 blur-[60px] pointer-events-none" />
+            <div className="absolute -bottom-24 -right-24 h-48 w-48 rounded-full bg-purple-500/15 blur-[60px] pointer-events-none" />
+
+            <p className="eyebrow text-primary font-medium tracking-wider">Ready when you are</p>
+            <h2 className="h-display mt-4 text-3xl font-extrabold text-foreground md:text-4xl tracking-tight leading-tight">
               Let's talk about what you're building.
             </h2>
-            <Link
-              to="/contact"
-              className="mt-6 inline-block rounded-full bg-background px-5 py-3 text-sm font-medium text-foreground"
-            >
-              Book a consultation
-            </Link>
+            <p className="mt-4 max-w-xl text-muted-foreground leading-relaxed text-sm">
+              Share your startup vision or compliance needs. We'll map out a custom launch roadmap in a free 30-minute consultation.
+            </p>
+            <div className="mt-8 flex flex-wrap items-center gap-3">
+              <Link
+                to="/contact"
+                className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground shadow-md shadow-primary/15 transition-transform duration-300 hover:scale-[1.02]"
+              >
+                Book a consultation
+              </Link>
+              <Link
+                to="/services"
+                className="inline-flex items-center rounded-full border border-border bg-background/50 px-6 py-3.5 text-sm font-semibold text-foreground backdrop-blur-sm transition-all duration-300 hover:bg-muted/80"
+              >
+                Explore Services
+              </Link>
+            </div>
           </div>
         </Reveal>
       </section>

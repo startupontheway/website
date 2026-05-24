@@ -5,7 +5,9 @@ import { Menu, X, Sun, Moon } from "lucide-react";
 const links = [
   { to: "/", label: "Home" },
   { to: "/services", label: "Services" },
-  { to: "/blogs", label: "Blogs" },
+  { to: "/vlogs", label: "Vlogs" },
+  { to: "/wealth-creation", label: "Wealth Creation" },
+  { to: "/news", label: "News" },
   { to: "/about", label: "About" },
   { to: "/contact", label: "Contact" },
 ] as const;
@@ -60,7 +62,7 @@ export function Navbar() {
     >
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6 md:px-10">
         <Link to="/" className="flex items-center gap-2">
-          <span className="font-display text-lg font-semibold tracking-tight">StartUpOnTheWay</span>
+          <img src="/media/logo.png" alt="Logo" className="h-30 w-auto object-contain" />
         </Link>
 
         <nav className="hidden items-center gap-8 md:flex">

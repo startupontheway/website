@@ -21,7 +21,18 @@ import {
   Moon,
   X,
   Pencil,
+  Coins,
+  Newspaper,
+  Sparkles,
 } from "lucide-react";
+export interface NewsItem {
+  id: string;
+  title: string;
+  content: string;
+  image_url: string | null;
+  created_at: string;
+  is_marquee?: boolean;
+}
 
 export interface Lead {
   id: string;
@@ -44,6 +55,9 @@ export interface Blog {
   category_id: string | null;
   status: string;
   created_at: string;
+  video_url: string | null;
+  video_type: string | null;
+  thumbnail_url: string | null;
 }
 
 export interface Category {
@@ -73,7 +87,46 @@ export interface EstimatorService {
   created_at: string;
 }
 
-type Tab = "overview" | "leads" | "blogs" | "services" | "estimator";
+export interface InvestmentTip {
+  id: string;
+  title: string;
+  content: string;
+  category: string;
+  created_at: string;
+}
+
+const DEFAULT_TIPS: InvestmentTip[] = [
+  {
+    id: "tip-1",
+    title: "The Power of Compounding via SIP",
+    category: "Mutual Funds",
+    content: "<p>Compounding is often called the eighth wonder of the world. By starting a Systematic Investment Plan (SIP) early, you allow your interest to earn interest over time. For example, investing ₹10,000 monthly for 20 years at a 12% expected annual return could grow to over ₹99 Lakhs, with your own investment being only ₹24 Lakhs.</p><strong>Key Takeaways:</strong><ul><li>Start early: Even a 5-year delay can cut your final corpus by half.</li><li>Consistency: Automate your monthly investments to remove emotional bias.</li><li>Top-up: Increase your SIP by 5-10% every year as your income grows.</li></ul>",
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: "tip-2",
+    title: "Tax Saving under Section 80C & Beyond",
+    category: "Tax Planning",
+    content: "<p>Smart tax planning is the first step to wealth creation. Under Section 80C of the Income Tax Act, you can deduct up to ₹1.5 Lakhs from your taxable income. Key instruments include ELSS Mutual Funds (which have the shortest lock-in period of 3 years), PPF, and National Savings Certificates.</p><strong>Best Tax-Saving Strategies:</strong><ul><li>ELSS Funds: Benefit from equity returns while saving tax.</li><li>NPS (Section 80CCD(1B)): Save an additional ₹50,000 on top of the 80C limit.</li><li>Health Insurance (Section 80D): Claim deductions on premium paid for self and parents.</li></ul>",
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: "tip-3",
+    title: "Emergency Funds: Your Financial Shield",
+    category: "Smart Savings",
+    content: "<p>Before allocating money to high-yield equity funds, ensure you have an emergency fund. This fund should cover at least 6 months of your unavoidable monthly expenses (rent, food, EMIs, insurance premiums). Keep this money in liquid mutual funds or high-yield savings accounts that offer immediate access.</p><strong>Tips for Emergency Fund:</strong><ul><li>Calculate accurately: Include all essential bills and healthcare premiums.</li><li>High Liquidity: Do not lock it in long-term FDs or equity.</li><li>Replenish first: If you draw from it, make refilling it your number one priority.</li></ul>",
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: "tip-4",
+    title: "Equity vs Debt: Finding the Right Asset Mix",
+    category: "Asset Allocation",
+    content: "<p>An optimal asset allocation protects you from market volatility. Younger investors can afford to allocate 70-80% of their savings to equities for long-term growth, whereas those closer to retirement should skew towards debt or fixed income for stability.</p><strong>Allocation Rules of Thumb:</strong><ul><li>Rule of 100: Subtract your age from 100 to find your ideal equity allocation percentage.</li><li>Rebalance annually: Shift gains from equity to debt (or vice versa) to maintain your target mix.</li><li>Diversify globally: Allocate 10-15% in international funds to hedge geographic risk.</li></ul>",
+    created_at: new Date().toISOString(),
+  },
+];
+
+type Tab = "overview" | "leads" | "blogs" | "services" | "estimator" | "tips" | "news";
 
 const DEFAULT_ESTIMATOR_SERVICES: EstimatorService[] = [
   {
@@ -174,7 +227,25 @@ function AdminPage() {
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [estimatorServices, setEstimatorServices] = useState<EstimatorService[]>([]);
+  const [investmentTips, setInvestmentTips] = useState<InvestmentTip[]>([]);
   const [isLoadingData, setIsLoadingData] = useState(false);
+
+  // Wealth Creation Tip Form States
+  const [newTipTitle, setNewTipTitle] = useState("");
+  const [newTipCategory, setNewTipCategory] = useState("Mutual Funds");
+  const [newTipContent, setNewTipContent] = useState("");
+  const [selectedTip, setSelectedTip] = useState<InvestmentTip | null>(null);
+  const [editingTip, setEditingTip] = useState<InvestmentTip | null>(null);
+
+  // News Form States
+  const [newsList, setNewsList] = useState<NewsItem[]>([]);
+  const [newNewsTitle, setNewNewsTitle] = useState("");
+  const [newNewsContent, setNewNewsContent] = useState("");
+  const [newNewsImageUrl, setNewNewsImageUrl] = useState("");
+  const [isUploadingNewsImage, setIsUploadingNewsImage] = useState(false);
+  const [selectedNews, setSelectedNews] = useState<NewsItem | null>(null);
+  const [editingNews, setEditingNews] = useState<NewsItem | null>(null);
+  const [newNewsIsMarquee, setNewNewsIsMarquee] = useState(false);
 
   // Creation Form States
   const [newCategoryName, setNewCategoryName] = useState("");
@@ -183,6 +254,7 @@ function AdminPage() {
   const [newBlogExcerpt, setNewBlogExcerpt] = useState("");
   const [newBlogContent, setNewBlogContent] = useState("");
   const [newBlogCategory, setNewBlogCategory] = useState("");
+  const [newBlogVideoUrl, setNewBlogVideoUrl] = useState("");
 
   // Services dynamic tab state
   const [servicesList, setServicesList] = useState<ServiceItem[]>([]);
@@ -236,7 +308,7 @@ function AdminPage() {
   useEffect(() => {
     if (!isAuthenticated) return;
 
-    // Create channel to listen for changes on leads, blogs, and services
+    // Create channel to listen for changes on leads, vlogs, and services
     const channel = supabase
       .channel("admin-realtime-dashboard")
       .on(
@@ -249,9 +321,9 @@ function AdminPage() {
       )
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "blogs" },
+        { event: "*", schema: "public", table: "vlogs" },
         (payload) => {
-          console.log("Realtime blogs update received:", payload);
+          console.log("Realtime vlogs update received:", payload);
           fetchDashboardData(true); // Silent update in background!
         }
       )
@@ -260,6 +332,22 @@ function AdminPage() {
         { event: "*", schema: "public", table: "services" },
         (payload) => {
           console.log("Realtime services update received:", payload);
+          fetchDashboardData(true); // Silent update in background!
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "news" },
+        (payload) => {
+          console.log("Realtime news update received:", payload);
+          fetchDashboardData(true); // Silent update in background!
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "investment_tips" },
+        (payload) => {
+          console.log("Realtime tips update received:", payload);
           fetchDashboardData(true); // Silent update in background!
         }
       )
@@ -325,9 +413,9 @@ function AdminPage() {
       if (leadsErr) throw leadsErr;
       setLeads(leadsData || []);
 
-      // 2. Fetch Blogs
+      // 2. Fetch Vlogs
       const { data: blogsData, error: blogsErr } = await supabase
-        .from("blogs")
+        .from("vlogs")
         .select("*")
         .order("created_at", { ascending: false });
       if (blogsErr) throw blogsErr;
@@ -374,6 +462,38 @@ function AdminPage() {
         }
       } catch (e) {
         console.warn("Services table not loaded yet or empty.", e);
+      }
+
+      // 6. Fetch Investment Tips
+      try {
+        const { data: tipsData, error: tipsErr } = await supabase
+          .from("investment_tips" as any)
+          .select("*")
+          .order("created_at", { ascending: false });
+        if (!tipsErr && tipsData && tipsData.length > 0) {
+          setInvestmentTips(tipsData as unknown as InvestmentTip[]);
+        } else {
+          setInvestmentTips(DEFAULT_TIPS);
+        }
+      } catch (e) {
+        console.warn("Investment tips table not loaded yet or empty.", e);
+        setInvestmentTips(DEFAULT_TIPS);
+      }
+
+      // 7. Fetch News
+      try {
+        const { data: newsData, error: newsErr } = await supabase
+          .from("news" as any)
+          .select("*")
+          .order("created_at", { ascending: false });
+        if (!newsErr && newsData && newsData.length > 0) {
+          setNewsList(newsData as unknown as NewsItem[]);
+        } else {
+          setNewsList([]);
+        }
+      } catch (e) {
+        console.warn("News table not loaded yet or empty.", e);
+        setNewsList([]);
       }
     } catch (err) {
       console.error(err);
@@ -650,7 +770,7 @@ function AdminPage() {
     }
   };
 
-  // Blogs Operations
+  // Vlogs Operations
   const handleCreateBlog = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newBlogTitle.trim() || !newBlogSlug.trim() || !newBlogContent.trim()) {
@@ -660,7 +780,7 @@ function AdminPage() {
 
     try {
       const { data, error } = await supabase
-        .from("blogs")
+        .from("vlogs")
         .insert({
           title: newBlogTitle,
           slug: newBlogSlug,
@@ -668,11 +788,14 @@ function AdminPage() {
           content: newBlogContent,
           category_id: newBlogCategory || null,
           status: "published",
+          video_url: newBlogVideoUrl || null,
+          video_type: "youtube",
+          thumbnail_url: null,
         })
         .select();
 
       if (error) throw error;
-      toast.success("Blog post published successfully!");
+      toast.success("Vlog post published successfully!");
       if (data) setBlogs([...blogs, ...data]);
 
       // Reset Form
@@ -681,6 +804,7 @@ function AdminPage() {
       setNewBlogExcerpt("");
       setNewBlogContent("");
       setNewBlogCategory("");
+      setNewBlogVideoUrl("");
     } catch (err) {
       const error = err as Error;
       toast.error(error.message);
@@ -690,9 +814,9 @@ function AdminPage() {
   const handleDeleteBlog = async (blogId: string, blogTitle: string) => {
     if (!confirm(`Are you sure you want to delete "${blogTitle}"?`)) return;
     try {
-      const { error } = await supabase.from("blogs").delete().eq("id", blogId);
+      const { error } = await supabase.from("vlogs").delete().eq("id", blogId);
       if (error) throw error;
-      toast.success("Blog post deleted successfully.");
+      toast.success("Vlog post deleted successfully.");
       setBlogs(blogs.filter((b) => b.id !== blogId));
     } catch (err) {
       const error = err as Error;
@@ -708,6 +832,235 @@ function AdminPage() {
         .replace(/[^a-z0-9]+/g, "-")
         .replace(/(^-|-$)/g, ""),
     );
+  };
+
+  // Investment Tips Operations
+  const handleCreateTip = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newTipTitle.trim() || !newTipCategory.trim() || !newTipContent.trim()) {
+      toast.error("Please fill in all required fields.");
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from("investment_tips" as any)
+        .insert({
+          title: newTipTitle,
+          category: newTipCategory,
+          content: newTipContent,
+        })
+        .select();
+
+      if (error) throw error;
+      toast.success("Investment tip published successfully!");
+      if (data) setInvestmentTips([...investmentTips, ...(data as unknown as InvestmentTip[])]);
+
+      // Reset Form
+      setNewTipTitle("");
+      setNewTipCategory("Mutual Funds");
+      setNewTipContent("");
+    } catch (err) {
+      const error = err as Error;
+      toast.error(error.message);
+    }
+  };
+
+  const startEditTip = (tip: InvestmentTip) => {
+    setEditingTip(tip);
+    setNewTipTitle(tip.title);
+    setNewTipCategory(tip.category);
+    setNewTipContent(tip.content);
+  };
+
+  const cancelEditTip = () => {
+    setEditingTip(null);
+    setNewTipTitle("");
+    setNewTipCategory("Mutual Funds");
+    setNewTipContent("");
+  };
+
+  const handleUpdateTip = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingTip) return;
+    if (!newTipTitle.trim() || !newTipCategory.trim() || !newTipContent.trim()) {
+      toast.error("Please fill in all required fields.");
+      return;
+    }
+
+    try {
+      if (editingTip.id.startsWith("tip-")) {
+        // Fallback tip. Save to Supabase as a new entry.
+        const { data, error } = await supabase
+          .from("investment_tips" as any)
+          .insert({
+            title: newTipTitle,
+            category: newTipCategory,
+            content: newTipContent,
+          })
+          .select();
+
+        if (error) throw error;
+        toast.success("Default tip customized and saved to database!");
+        if (data) {
+          setInvestmentTips(
+            investmentTips.map((t) => (t.id === editingTip.id ? (data[0] as unknown as InvestmentTip) : t))
+          );
+        }
+      } else {
+        // Database tip. Update it.
+        const { data, error } = await supabase
+          .from("investment_tips" as any)
+          .update({
+            title: newTipTitle,
+            category: newTipCategory,
+            content: newTipContent,
+          })
+          .eq("id", editingTip.id)
+          .select();
+
+        if (error) throw error;
+        toast.success("Investment tip updated successfully!");
+        if (data) {
+          setInvestmentTips(
+            investmentTips.map((t) => (t.id === editingTip.id ? (data[0] as unknown as InvestmentTip) : t))
+          );
+        }
+      }
+
+      // Reset Edit State
+      setEditingTip(null);
+      setNewTipTitle("");
+      setNewTipCategory("Mutual Funds");
+      setNewTipContent("");
+    } catch (err) {
+      const error = err as Error;
+      toast.error(error.message);
+    }
+  };
+
+  const handleDeleteTip = async (tipId: string, tipTitle: string) => {
+    if (!confirm(`Are you sure you want to delete "${tipTitle}"?`)) return;
+    try {
+      if (tipId.startsWith("tip-")) {
+        toast.success("Fallback tip removed from preview.");
+        setInvestmentTips(investmentTips.filter((t) => t.id !== tipId));
+        return;
+      }
+
+      const { error } = await supabase.from("investment_tips" as any).delete().eq("id", tipId);
+      if (error) throw error;
+      toast.success("Investment tip deleted successfully.");
+      setInvestmentTips(investmentTips.filter((t) => t.id !== tipId));
+    } catch (err) {
+      const error = err as Error;
+      toast.error(error.message);
+    }
+  };
+
+  // News Operations
+  const handleCreateNews = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newNewsTitle.trim() || !newNewsContent.trim()) {
+      toast.error("Please fill in all required fields.");
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from("news" as any)
+        .insert({
+          title: newNewsTitle,
+          content: newNewsContent,
+          image_url: newNewsImageUrl || null,
+          is_marquee: newNewsIsMarquee,
+        })
+        .select();
+
+      if (error) throw error;
+      toast.success("News article published successfully!");
+      if (data) {
+        setNewsList([...newsList, ...(data as unknown as NewsItem[])]);
+      }
+
+      // Reset form
+      setNewNewsTitle("");
+      setNewNewsContent("");
+      setNewNewsImageUrl("");
+      setNewNewsIsMarquee(false);
+    } catch (err) {
+      const error = err as Error;
+      toast.error(error.message);
+    }
+  };
+
+  const startEditNews = (item: NewsItem) => {
+    setEditingNews(item);
+    setNewNewsTitle(item.title);
+    setNewNewsContent(item.content);
+    setNewNewsImageUrl(item.image_url || "");
+    setNewNewsIsMarquee(item.is_marquee || false);
+  };
+
+  const cancelEditNews = () => {
+    setEditingNews(null);
+    setNewNewsTitle("");
+    setNewNewsContent("");
+    setNewNewsImageUrl("");
+    setNewNewsIsMarquee(false);
+  };
+
+  const handleUpdateNews = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingNews) return;
+    if (!newNewsTitle.trim() || !newNewsContent.trim()) {
+      toast.error("Please fill in all required fields.");
+      return;
+    }
+
+    try {
+      // Database update
+      const { data, error } = await supabase
+        .from("news" as any)
+        .update({
+          title: newNewsTitle,
+          content: newNewsContent,
+          image_url: newNewsImageUrl || null,
+          is_marquee: newNewsIsMarquee,
+        })
+        .eq("id", editingNews.id)
+        .select();
+
+      if (error) throw error;
+      toast.success("News article updated successfully!");
+      if (data) {
+        setNewsList(
+          newsList.map((n) => (n.id === editingNews.id ? (data[0] as unknown as NewsItem) : n))
+        );
+      }
+
+      setEditingNews(null);
+      setNewNewsTitle("");
+      setNewNewsContent("");
+      setNewNewsImageUrl("");
+      setNewNewsIsMarquee(false);
+    } catch (err) {
+      const error = err as Error;
+      toast.error(error.message);
+    }
+  };
+
+  const handleDeleteNews = async (newsId: string, newsTitle: string) => {
+    if (!confirm(`Are you sure you want to delete "${newsTitle}"?`)) return;
+    try {
+      const { error } = await supabase.from("news" as any).delete().eq("id", newsId);
+      if (error) throw error;
+      toast.success("News article deleted successfully.");
+      setNewsList(newsList.filter((n) => n.id !== newsId));
+    } catch (err) {
+      const error = err as Error;
+      toast.error(error.message);
+    }
   };
 
   // ----------------------------------------------------
@@ -807,8 +1160,10 @@ function AdminPage() {
               { id: "overview", label: "Overview", icon: TrendingUp },
               { id: "leads", label: "Leads", icon: Users, badge: leads.length },
               { id: "estimator", label: "Cost Estimator", icon: DollarSign },
-              { id: "blogs", label: "Blog Editor", icon: FileText, badge: blogs.length },
+              { id: "blogs", label: "Vlog Editor", icon: FileText, badge: blogs.length },
               { id: "services", label: "Services", icon: Grid, badge: servicesList.length },
+              { id: "tips", label: "Wealth Tips", icon: Coins, badge: investmentTips.length },
+              { id: "news", label: "News Editor", icon: Newspaper, badge: newsList.length },
             ].map((tabItem) => {
               const IconComp = tabItem.icon;
               const isActive = activeTab === tabItem.id;
@@ -900,7 +1255,7 @@ function AdminPage() {
                   color: "text-primary",
                 },
                 {
-                  label: "Blog Publications",
+                  label: "Vlog Publications",
                   value: blogs.length,
                   icon: FileText,
                   color: "text-indigo-400",
@@ -926,7 +1281,7 @@ function AdminPage() {
                     {card.value}
                   </p>
                   <div className="flex items-center gap-1 text-[11px] text-muted-foreground mt-2">
-                    <TrendingUp className="h-3 w-3 text-emerald-500" /> Active Supabase Sync
+                    <TrendingUp className="h-3 w-3 text-emerald-500" /> Active Database Sync
                   </div>
                 </div>
               ))}
@@ -976,7 +1331,7 @@ function AdminPage() {
                 ))}
                 {leads.length === 0 && (
                   <p className="text-sm text-muted-foreground text-center py-6">
-                    No lead inquiries found in Supabase.
+                    No lead inquiries found.
                   </p>
                 )}
               </div>
@@ -1090,83 +1445,61 @@ function AdminPage() {
             ---------------------------------------------------- */}
         {activeTab === "blogs" && (
           <div className="grid gap-8 lg:grid-cols-[1fr_360px]">
-            {/* Create new post form */}
+            {/* Create new vlog form */}
             <div className="rounded-2xl border border-border bg-card/40 backdrop-blur-sm p-6 shadow-card">
               <h3 className="text-base font-semibold text-foreground mb-5 flex items-center gap-2">
-                <Plus className="h-4.5 w-4.5 text-primary" /> Create & Publish Article
+                <Plus className="h-4.5 w-4.5 text-primary" /> Create & Publish Vlog Reel
               </h3>
 
               <form onSubmit={handleCreateBlog} className="space-y-4">
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
-                      Article Title <span className="text-primary">*</span>
-                    </label>
-                    <input
-                      required
-                      value={newBlogTitle}
-                      onChange={(e) => autoGenerateSlug(e.target.value)}
-                      placeholder="Pricing updates for pvt ltd..."
-                      className="w-full rounded-xl border border-border bg-background/50 px-4 py-2.5 text-sm outline-none focus:border-primary transition-all"
-                    />
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
-                      URL Slug Path <span className="text-primary">*</span>
-                    </label>
-                    <input
-                      required
-                      value={newBlogSlug}
-                      onChange={(e) => setNewBlogSlug(e.target.value)}
-                      placeholder="pricing-updates-for-pvt-ltd"
-                      className="w-full rounded-xl border border-border bg-background/50 px-4 py-2.5 text-sm outline-none focus:border-primary transition-all"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
-                      Assigned Category
-                    </label>
-                    <select
-                      value={newBlogCategory}
-                      onChange={(e) => setNewBlogCategory(e.target.value)}
-                      className="w-full rounded-xl border border-border bg-background/50 px-4 py-2.5 text-sm outline-none focus:border-primary transition-all"
-                    >
-                      <option value="">No Category</option>
-                      {categories.map((c) => (
-                        <option key={c.id} value={c.id}>
-                          {c.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
-                      Short Excerpt
-                    </label>
-                    <input
-                      value={newBlogExcerpt}
-                      onChange={(e) => setNewBlogExcerpt(e.target.value)}
-                      placeholder="Quick summary of this article..."
-                      className="w-full rounded-xl border border-border bg-background/50 px-4 py-2.5 text-sm outline-none focus:border-primary transition-all"
-                    />
-                  </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
+                    Vlog Title <span className="text-primary">*</span>
+                  </label>
+                  <input
+                    required
+                    value={newBlogTitle}
+                    onChange={(e) => autoGenerateSlug(e.target.value)}
+                    placeholder="GST registration steps..."
+                    className="w-full rounded-xl border border-border bg-background/50 px-4 py-2.5 text-sm outline-none focus:border-primary transition-all"
+                  />
                 </div>
 
                 <div className="space-y-1.5">
                   <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
-                    Full Content Markdown <span className="text-primary">*</span>
+                    YouTube Link / Shorts URL <span className="text-primary">*</span>
+                  </label>
+                  <input
+                    required
+                    value={newBlogVideoUrl}
+                    onChange={(e) => setNewBlogVideoUrl(e.target.value)}
+                    placeholder="https://www.youtube.com/shorts/VIDEO_ID"
+                    className="w-full rounded-xl border border-border bg-background/50 px-4 py-2.5 text-sm outline-none focus:border-primary transition-all"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
+                    Short Excerpt
+                  </label>
+                  <input
+                    value={newBlogExcerpt}
+                    onChange={(e) => setNewBlogExcerpt(e.target.value)}
+                    placeholder="Quick summary of this vlog..."
+                    className="w-full rounded-xl border border-border bg-background/50 px-4 py-2.5 text-sm outline-none focus:border-primary transition-all"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
+                    Full Content/Description Markdown <span className="text-primary">*</span>
                   </label>
                   <textarea
                     required
-                    rows={8}
+                    rows={6}
                     value={newBlogContent}
                     onChange={(e) => setNewBlogContent(e.target.value)}
-                    placeholder="Write your article details here. Markdown support is enabled."
+                    placeholder="Write detailed information for this vlog here. Markdown support is enabled."
                     className="w-full rounded-xl border border-border bg-background/50 px-4 py-3 text-sm outline-none focus:border-primary transition-all font-mono"
                   />
                 </div>
@@ -1175,29 +1508,33 @@ function AdminPage() {
                   type="submit"
                   className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-primary to-purple-600 px-6 py-3 text-sm font-semibold text-primary-foreground shadow-md shadow-primary/10 transition-transform duration-300 hover:scale-[1.01]"
                 >
-                  Publish Article
+                  Publish Vlog Reel
                 </button>
               </form>
             </div>
 
-            {/* List of Published Articles */}
+            {/* List of Published Vlogs */}
             <div className="space-y-4">
-              <h3 className="text-base font-semibold text-foreground">Published Posts</h3>
+              <h3 className="text-base font-semibold text-foreground">Published Vlog Reels</h3>
               <div className="space-y-3">
                 {blogs.map((blog) => (
                   <div
                     key={blog.id}
                     className="rounded-xl border border-border bg-card/60 p-5 flex items-center justify-between"
                   >
-                    <div>
-                      <p className="font-semibold text-sm text-foreground leading-tight">
+                    <div className="min-w-0 flex-1">
+                      <p className="font-semibold text-sm text-foreground leading-tight truncate">
                         {blog.title}
                       </p>
-                      <p className="text-xs text-muted-foreground mt-1">Slug: /{blog.slug}</p>
+                      <div className="flex gap-2 mt-1.5">
+                        <span className="text-[10px] font-semibold bg-primary/10 text-primary px-2 py-0.5 rounded-full uppercase border border-primary/20">
+                          {blog.video_type || "No Video"}
+                        </span>
+                      </div>
                     </div>
                     <button
                       onClick={() => handleDeleteBlog(blog.id, blog.title)}
-                      className="rounded-lg p-2 text-rose-500 hover:bg-rose-500/10 transition-colors shrink-0 ml-4"
+                      className="rounded-lg p-2 text-rose-500 hover:bg-rose-500/10 transition-colors shrink-0 ml-4 cursor-pointer"
                     >
                       <Trash2 className="h-4.5 w-4.5" />
                     </button>
@@ -1205,7 +1542,7 @@ function AdminPage() {
                 ))}
                 {blogs.length === 0 && (
                   <p className="text-sm text-muted-foreground text-center py-8">
-                    No articles found in Supabase.
+                    No vlogs found in Supabase.
                   </p>
                 )}
               </div>
@@ -1489,6 +1826,348 @@ function AdminPage() {
             </div>
           </div>
         )}
+
+        {/* ----------------------------------------------------
+            TAB VIEW: TIPS (WEALTH CREATION TIPS)
+            ---------------------------------------------------- */}
+        {activeTab === "tips" && (
+          <div className="grid gap-8 lg:grid-cols-[1fr_400px]">
+            {/* Create/Edit Tip Form */}
+            <div className="rounded-2xl border border-border bg-card/40 backdrop-blur-sm p-6 shadow-card space-y-6">
+              <div>
+                <h3 className="text-base font-semibold text-foreground">
+                  {editingTip ? `Edit Guide: ${editingTip.title}` : "Publish New Investment Guide"}
+                </h3>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {editingTip
+                    ? "Modify the title, category, or content of your published guide."
+                    : "Write detailed financial articles, tax saving tips, or budgeting guidance for the Wealth Creation page."}
+                </p>
+              </div>
+
+              <form onSubmit={editingTip ? handleUpdateTip : handleCreateTip} className="space-y-4">
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
+                      Article Title *
+                    </label>
+                    <input
+                      required
+                      value={newTipTitle}
+                      onChange={(e) => setNewTipTitle(e.target.value)}
+                      placeholder="e.g. Navigating ELSS Mutual Funds"
+                      className="w-full rounded-xl border border-border bg-background/50 px-4 py-2.5 text-sm outline-none focus:border-primary transition-all"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
+                      Category / Tag *
+                    </label>
+                    <select
+                      required
+                      value={newTipCategory}
+                      onChange={(e) => setNewTipCategory(e.target.value)}
+                      className="w-full rounded-xl border border-border bg-background/50 px-4 py-2.5 text-sm outline-none focus:border-primary transition-all text-foreground"
+                    >
+                      <option value="Mutual Funds">Mutual Funds</option>
+                      <option value="Tax Planning">Tax Planning</option>
+                      <option value="Smart Savings">Smart Savings</option>
+                      <option value="Asset Allocation">Asset Allocation</option>
+                      <option value="Retirement">Retirement</option>
+                      <option value="Loans & Debt">Loans & Debt</option>
+                      <option value="Financial Planning">Financial Planning</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
+                    Guide Content (HTML/Markdown Supported) *
+                  </label>
+                  <textarea
+                    required
+                    rows={8}
+                    value={newTipContent}
+                    onChange={(e) => setNewTipContent(e.target.value)}
+                    placeholder="Write detailed paragraphs, tables, or list items about this financial strategy..."
+                    className="w-full rounded-xl border border-border bg-background/50 px-4 py-3 text-sm outline-none focus:border-primary transition-all font-mono"
+                  />
+                </div>
+
+                <div className="pt-3 border-t border-border flex justify-end gap-3">
+                  {editingTip && (
+                    <button
+                      type="button"
+                      onClick={cancelEditTip}
+                      className="rounded-full bg-muted/40 hover:bg-muted/80 px-6 py-3 text-sm font-semibold text-foreground transition-all cursor-pointer"
+                    >
+                      Cancel Edit
+                    </button>
+                  )}
+                  <button
+                    type="submit"
+                    className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-primary to-purple-600 px-6 py-3 text-sm font-semibold text-primary-foreground shadow-md shadow-primary/10 transition-transform duration-300 hover:scale-[1.01]"
+                  >
+                    {editingTip ? "Update Investment Guide" : "Publish Investment Guide"}
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            {/* Published Tips List */}
+            <div className="space-y-6">
+              <div className="rounded-2xl border border-border bg-card/40 backdrop-blur-sm p-6 shadow-card">
+                <h3 className="text-base font-semibold text-foreground">
+                  Published Tips ({investmentTips.length})
+                </h3>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  View and manage current finance articles displayed on the Wealth Creation frontend. Click to preview.
+                </p>
+
+                <div className="space-y-3 mt-6 max-h-[600px] overflow-y-auto pr-1">
+                  {investmentTips.map((tip) => (
+                    <div
+                      key={tip.id}
+                      onClick={() => setSelectedTip(tip)}
+                      className="rounded-xl border border-border bg-card/60 p-4 flex items-start justify-between gap-4 cursor-pointer hover:border-primary/30 hover:bg-card transition-all group"
+                    >
+                      <div className="min-w-0 flex-1">
+                        <span className="text-[9px] font-bold bg-primary/10 text-primary px-2 py-0.5 rounded-full uppercase border border-primary/20">
+                          {tip.category}
+                        </span>
+                        <h4 className="font-semibold text-xs text-foreground mt-2 truncate group-hover:text-primary transition-colors">
+                          {tip.title}
+                        </h4>
+                        <p className="text-[10px] text-muted-foreground mt-1">
+                          Published: {new Date(tip.created_at).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-1 shrink-0">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            startEditTip(tip);
+                          }}
+                          className="rounded-lg p-2 text-primary hover:bg-primary/10 transition-colors cursor-pointer"
+                          title="Edit Tip"
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteTip(tip.id, tip.title);
+                          }}
+                          className="rounded-lg p-2 text-rose-500 hover:bg-rose-500/10 transition-colors cursor-pointer"
+                          title="Delete Tip"
+                        >
+                          <Trash2 className="h-4.5 w-4.5" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+
+                  {investmentTips.length === 0 && (
+                    <div className="text-center py-10">
+                      <Coins className="h-8 w-8 text-muted-foreground/60 mx-auto mb-2" />
+                      <p className="text-xs text-muted-foreground">
+                        No investment guides found. Add one above!
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ----------------------------------------------------
+            TAB VIEW: NEWS (COMPANY NEWS & INSIGHTS)
+            ---------------------------------------------------- */}
+        {activeTab === "news" && (
+          <div className="grid gap-8 lg:grid-cols-[1fr_400px]">
+            {/* Create/Edit News Form */}
+            <div className="rounded-2xl border border-border bg-card/40 backdrop-blur-sm p-6 shadow-card space-y-6">
+              <div>
+                <h3 className="text-base font-semibold text-foreground">
+                  {editingNews ? `Edit News: ${editingNews.title}` : "Publish News Article"}
+                </h3>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {editingNews
+                    ? "Modify the title, image/thumbnail, or main content of this news article."
+                    : "Add regulatory announcements, business insights, or tax alerts for the News page."}
+                </p>
+              </div>
+
+              <form onSubmit={editingNews ? handleUpdateNews : handleCreateNews} className="space-y-4">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
+                    Article Title <span className="text-primary">*</span>
+                  </label>
+                  <input
+                    required
+                    value={newNewsTitle}
+                    onChange={(e) => setNewNewsTitle(e.target.value)}
+                    placeholder="e.g. RBI Changes Repo Rate: Implications for Startups"
+                    className="w-full rounded-xl border border-border bg-background/50 px-4 py-2.5 text-sm outline-none focus:border-primary transition-all"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
+                    Thumbnail Image Option (URL or Upload)
+                  </label>
+                  <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
+                    <input
+                      value={newNewsImageUrl}
+                      onChange={(e) => setNewNewsImageUrl(e.target.value)}
+                      placeholder="https://images.unsplash.com/photo-..."
+                      className="w-full rounded-xl border border-border bg-background/50 px-4 py-2.5 text-sm outline-none focus:border-primary transition-all"
+                    />
+                    <label className="rounded-xl border border-border bg-muted/50 px-4 py-2.5 text-xs font-semibold text-foreground hover:bg-muted transition-colors cursor-pointer flex items-center justify-center">
+                      {isUploading ? "Uploading..." : "Upload File"}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => handleFileUpload(e, setNewNewsImageUrl)}
+                        disabled={isUploading}
+                      />
+                    </label>
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
+                    Content Editor (HTML & links supported) <span className="text-primary">*</span>
+                  </label>
+                  <HtmlEditor
+                    id="newNewsContent"
+                    value={newNewsContent}
+                    setValue={setNewNewsContent}
+                    placeholder="Write detailed news content here. Plain text URLs will automatically become clickable links in the frontend!"
+                  />
+                </div>
+
+                <div className="flex items-center gap-3 bg-muted/20 border border-border p-3 rounded-xl">
+                  <input
+                    type="checkbox"
+                    id="newNewsIsMarquee"
+                    checked={newNewsIsMarquee}
+                    onChange={(e) => setNewNewsIsMarquee(e.target.checked)}
+                    className="h-4.5 w-4.5 rounded border-border accent-primary bg-transparent cursor-pointer"
+                  />
+                  <label htmlFor="newNewsIsMarquee" className="text-xs font-semibold text-foreground cursor-pointer select-none">
+                    Pin/Feature in Scrolling Strip
+                    <span className="block text-[10px] text-muted-foreground font-normal mt-0.5">
+                      Check this to highlight this headline in the homepage ticker.
+                    </span>
+                  </label>
+                </div>
+
+                <div className="pt-3 border-t border-border flex justify-between gap-3">
+                  {editingNews && (
+                    <button
+                      type="button"
+                      onClick={cancelEditNews}
+                      className="rounded-full border border-border bg-background px-5 py-3 text-sm font-semibold text-muted-foreground hover:bg-muted transition-colors"
+                    >
+                      Cancel Edit
+                    </button>
+                  )}
+                  <button
+                    type="submit"
+                    className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-primary to-purple-600 px-6 py-3 text-sm font-semibold text-primary-foreground shadow-md shadow-primary/10 transition-transform duration-300 hover:scale-[1.01]"
+                  >
+                    {editingNews ? "Update News Article" : "Publish News Article"}
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            {/* Published News List */}
+            <div className="space-y-6">
+              <div className="rounded-2xl border border-border bg-card/40 backdrop-blur-sm p-6 shadow-card">
+                <h3 className="text-base font-semibold text-foreground">
+                  Published News ({newsList.length})
+                </h3>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  View and manage current news articles displayed on the News frontend. Click to preview.
+                </p>
+
+                <div className="space-y-3 mt-6 max-h-[600px] overflow-y-auto pr-1">
+                  {newsList.map((item) => (
+                    <div
+                      key={item.id}
+                      onClick={() => setSelectedNews(item)}
+                      className="rounded-xl border border-border bg-card/60 p-4 flex items-start justify-between gap-4 cursor-pointer hover:border-primary/30 hover:bg-card transition-all group"
+                    >
+                      <div className="min-w-0 flex-1 flex gap-3">
+                        {/* Thumbnail image mini preview */}
+                        <div className="w-10 h-10 rounded bg-muted border border-border overflow-hidden shrink-0">
+                          {item.image_url ? (
+                            <img src={item.image_url} alt="" className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-primary bg-primary/10">
+                              <Newspaper className="h-4.5 w-4.5" />
+                            </div>
+                          )}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2">
+                            <h4 className="font-semibold text-xs text-foreground truncate group-hover:text-primary transition-colors">
+                              {item.title}
+                            </h4>
+                            {item.is_marquee && (
+                              <span className="rounded-full bg-primary/10 border border-primary/20 text-[9px] font-bold text-primary px-1.5 py-0.5 tracking-wider uppercase shrink-0 flex items-center gap-0.5" title="Featured in Ticker Marquee">
+                                <Sparkles className="h-2 w-2 text-primary" /> Ticker
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-[10px] text-muted-foreground mt-1">
+                            Published: {new Date(item.created_at).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1 shrink-0">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            startEditNews(item);
+                          }}
+                          className="rounded-lg p-2 text-primary hover:bg-primary/10 transition-colors cursor-pointer"
+                          title="Edit Article"
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteNews(item.id, item.title);
+                          }}
+                          className="rounded-lg p-2 text-rose-500 hover:bg-rose-500/10 transition-colors cursor-pointer"
+                          title="Delete Article"
+                        >
+                          <Trash2 className="h-4.5 w-4.5" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+
+                  {newsList.length === 0 && (
+                    <div className="text-center py-10">
+                      <Newspaper className="h-8 w-8 text-muted-foreground/60 mx-auto mb-2" />
+                      <p className="text-xs text-muted-foreground">
+                        No news articles published. Add one above!
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </main>
 
       {/* Maximized view for Lead Query */}
@@ -1594,6 +2273,100 @@ function AdminPage() {
                 className="rounded-xl bg-rose-500 hover:bg-rose-600 px-4 py-2 text-xs font-semibold text-white shadow-md shadow-rose-500/10 transition-colors cursor-pointer"
               >
                 Delete Lead
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Maximized view for Investment Tip */}
+      {selectedTip && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-md p-4 animate-fade-in">
+          <div className="w-full max-w-lg rounded-2xl border border-border bg-card p-6 shadow-2xl relative animate-scale-up max-h-[85vh] flex flex-col">
+            <button
+              onClick={() => setSelectedTip(null)}
+              className="absolute top-4 right-4 rounded-full p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors cursor-pointer"
+            >
+              <X className="h-4 w-4" />
+            </button>
+
+            <div className="flex items-center gap-3 border-b border-border pb-4 mb-5">
+              <span className="grid h-10 w-10 place-items-center rounded-xl bg-primary/10 text-primary">
+                <Coins className="h-5 w-5" />
+              </span>
+              <div>
+                <h3 className="text-base font-bold text-foreground">{selectedTip.title}</h3>
+                <span className="inline-block text-[9px] font-bold bg-primary/10 text-primary px-2 py-0.5 rounded-full uppercase border border-primary/20 mt-1">
+                  {selectedTip.category}
+                </span>
+              </div>
+            </div>
+
+            <div className="overflow-y-auto flex-1 text-sm leading-relaxed max-h-[50vh] text-foreground/80 space-y-3 pr-1">
+              <p className="text-[10px] text-muted-foreground">
+                Published on: {new Date(selectedTip.created_at).toLocaleString("en-IN")}
+              </p>
+              <div 
+                className="prose prose-sm dark:prose-invert max-w-none"
+                dangerouslySetInnerHTML={{ __html: selectedTip.content }} 
+              />
+            </div>
+
+            <div className="pt-4 border-t border-border mt-5 flex justify-end">
+              <button
+                onClick={() => setSelectedTip(null)}
+                className="rounded-xl bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground hover:opacity-90 cursor-pointer"
+              >
+                Close Preview
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Maximized view for News Article */}
+      {selectedNews && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-md p-4 animate-fade-in">
+          <div className="w-full max-w-lg rounded-2xl border border-border bg-card p-6 shadow-2xl relative animate-scale-up max-h-[85vh] flex flex-col">
+            <button
+              onClick={() => setSelectedNews(null)}
+              className="absolute top-4 right-4 rounded-full p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors cursor-pointer"
+            >
+              <X className="h-4 w-4" />
+            </button>
+
+            <div className="flex items-center gap-3 border-b border-border pb-4 mb-5">
+              <span className="grid h-10 w-10 place-items-center rounded-xl bg-primary/10 text-primary">
+                <Newspaper className="h-5 w-5" />
+              </span>
+              <div>
+                <h3 className="text-base font-bold text-foreground">{selectedNews.title}</h3>
+                <p className="text-[10px] text-muted-foreground mt-1">
+                  Published: {new Date(selectedNews.created_at).toLocaleString("en-IN")}
+                </p>
+              </div>
+            </div>
+
+            <div className="overflow-y-auto flex-1 text-sm leading-relaxed max-h-[50vh] text-foreground/80 space-y-4 pr-1">
+              {selectedNews.image_url && (
+                <img
+                  src={selectedNews.image_url}
+                  alt={selectedNews.title}
+                  className="w-full h-40 object-cover rounded-xl border border-border"
+                />
+              )}
+              <div 
+                className="prose prose-sm dark:prose-invert max-w-none text-foreground/80 leading-relaxed space-y-3"
+                dangerouslySetInnerHTML={{ __html: selectedNews.content }} 
+              />
+            </div>
+
+            <div className="pt-4 border-t border-border mt-5 flex justify-end">
+              <button
+                onClick={() => setSelectedNews(null)}
+                className="rounded-xl bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground hover:opacity-90 cursor-pointer"
+              >
+                Close Preview
               </button>
             </div>
           </div>

@@ -8,7 +8,7 @@ export type Database = {
   };
   public: {
     Tables: {
-      blogs: {
+      vlogs: {
         Row: {
           author_id: string | null;
           category_id: string | null;
@@ -24,6 +24,8 @@ export type Database = {
           thumbnail_url: string | null;
           title: string;
           updated_at: string;
+          video_url: string | null;
+          video_type: string | null;
         };
         Insert: {
           author_id?: string | null;
@@ -40,6 +42,8 @@ export type Database = {
           thumbnail_url?: string | null;
           title: string;
           updated_at?: string;
+          video_url?: string | null;
+          video_type?: string | null;
         };
         Update: {
           author_id?: string | null;
@@ -56,6 +60,8 @@ export type Database = {
           thumbnail_url?: string | null;
           title?: string;
           updated_at?: string;
+          video_url?: string | null;
+          video_type?: string | null;
         };
         Relationships: [
           {

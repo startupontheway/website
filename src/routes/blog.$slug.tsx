@@ -3,7 +3,7 @@ import { createFileRoute, redirect } from "@tanstack/react-router";
 export const Route = createFileRoute("/blog/$slug")({
   beforeLoad: ({ params }) => {
     throw redirect({
-      to: "/blogs/$slug",
+      to: "/vlogs/$slug",
       params: { slug: params.slug },
       replace: true,
     });

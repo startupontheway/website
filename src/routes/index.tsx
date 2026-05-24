@@ -242,21 +242,19 @@ function HeroWidget() {
         <div className="flex gap-2">
           <button
             onClick={() => setTab("estimator")}
-            className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${
-              tab === "estimator"
-                ? "bg-primary/15 text-primary"
-                : "text-muted-foreground hover:bg-muted hover:text-foreground"
-            }`}
+            className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${tab === "estimator"
+              ? "bg-primary/15 text-primary"
+              : "text-muted-foreground hover:bg-muted hover:text-foreground"
+              }`}
           >
             Cost Estimator
           </button>
           <button
             onClick={() => setTab("roadmap")}
-            className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${
-              tab === "roadmap"
-                ? "bg-primary/15 text-primary"
-                : "text-muted-foreground hover:bg-muted hover:text-foreground"
-            }`}
+            className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${tab === "roadmap"
+              ? "bg-primary/15 text-primary"
+              : "text-muted-foreground hover:bg-muted hover:text-foreground"
+              }`}
           >
             Launch Roadmap
           </button>
@@ -363,14 +361,82 @@ function HeroWidget() {
 }
 
 function TrustedRow() {
+  const [marqueeNews, setMarqueeNews] = useState<any[]>([]);
+
+  useEffect(() => {
+    async function loadMarqueeNews() {
+      try {
+        const { data, error } = await supabase
+          .from("news" as any)
+          .select("id, title")
+          .eq("is_marquee", true)
+          .order("created_at", { ascending: false });
+        if (!error && data) {
+          setMarqueeNews(data);
+        }
+      } catch (e) {
+        console.warn("Error fetching marquee news:", e);
+      }
+    }
+    loadMarqueeNews();
+  }, []);
+
+  // If no marquee articles are set yet, we show a default placeholder strip
+  const itemsToRender = marqueeNews.length > 0 
+    ? marqueeNews 
+    : [
+        { id: "welcome", title: "Welcome to StartUpOnTheWay! Check back for latest regulatory updates." },
+        { id: "compliance", title: "Incorporations, tax filings, and legal templates built for modern founders." }
+      ];
+
   return (
-    <section className="border-y border-border bg-surface">
-      <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-x-12 gap-y-4 px-6 py-8 md:px-10">
-        {trusted.map((t) => (
-          <span key={t} className="font-display text-xl text-muted-foreground/70">
-            {t}
-          </span>
-        ))}
+    <section className="border-y border-border bg-card/60 backdrop-blur-md overflow-hidden py-3.5 relative flex items-center h-12">
+      <style>{`
+        @keyframes marquee {
+          0% { transform: translateX(0%); }
+          100% { transform: translateX(-33.33%); }
+        }
+        .animate-marquee-custom {
+          display: flex;
+          width: max-content;
+          animation: marquee 35s linear infinite;
+        }
+        .animate-marquee-custom:hover {
+          animation-play-state: paused;
+        }
+      `}</style>
+      
+      {/* Badge Overlay */}
+      <div className="absolute left-0 z-10 bg-primary px-4 h-full text-xs font-extrabold text-primary-foreground uppercase tracking-widest flex items-center shadow-lg border-r border-primary/25 select-none font-sans">
+        <span className="hidden sm:inline">Latest &nbsp;</span> Updates
+      </div>
+
+      <div className="w-full overflow-hidden whitespace-nowrap pl-40 sm:pl-48">
+        <div className="animate-marquee-custom flex items-center gap-24 pr-24">
+          {/* Loop three times to ensure continuous marquee text on large screens */}
+          {Array.from({ length: 3 }).flatMap(() => itemsToRender).map((item, idx) => {
+            const isPlaceholder = item.id === "welcome" || item.id === "compliance";
+            return isPlaceholder ? (
+              <span
+                key={`${item.id}-${idx}`}
+                className="inline-flex items-center gap-3.5 text-xs sm:text-sm font-semibold text-muted-foreground/90 select-none"
+              >
+                <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+                <span>{item.title}</span>
+              </span>
+            ) : (
+              <Link
+                key={`${item.id}-${idx}`}
+                to="/news/$id"
+                params={{ id: item.id }}
+                className="inline-flex items-center gap-3.5 text-xs sm:text-sm font-semibold text-foreground hover:text-primary transition-colors cursor-pointer group"
+              >
+                <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+                <span className="group-hover:underline">{item.title}</span>
+              </Link>
+            );
+          })}
+        </div>
       </div>
     </section>
   );
@@ -490,11 +556,10 @@ function ServicesShowcase() {
                 <button
                   key={s.slug}
                   onClick={() => setActive(s.slug)}
-                  className={`flex w-full items-center justify-between rounded-xl px-4 py-3.5 text-left text-sm transition-all duration-300 ${
-                    isActive
-                      ? "bg-gradient-to-r from-primary to-purple-600 text-primary-foreground shadow-md shadow-primary/20 font-medium scale-[1.01]"
-                      : "hover:bg-muted/80 text-foreground/80 hover:text-foreground"
-                  }`}
+                  className={`flex w-full items-center justify-between rounded-xl px-4 py-3.5 text-left text-sm transition-all duration-300 ${isActive
+                    ? "bg-gradient-to-r from-primary to-purple-600 text-primary-foreground shadow-md shadow-primary/20 font-medium scale-[1.01]"
+                    : "hover:bg-muted/80 text-foreground/80 hover:text-foreground"
+                    }`}
                 >
                   <span>{s.name}</span>
                   <ArrowRight
@@ -514,22 +579,12 @@ function ServicesShowcase() {
             transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
             className="overflow-hidden rounded-2xl border border-border/80 bg-card/60 backdrop-blur-sm shadow-card hover:border-primary/20 transition-all duration-300"
           >
-            <div className="overflow-hidden border-b border-border/60">
-              <img
-                src={current.image_url || servicePreview}
-                alt={current.name}
-                width={1024}
-                height={704}
-                loading="lazy"
-                className="h-[260px] w-full object-cover md:h-[320px] transition-transform duration-700 hover:scale-[1.02]"
-              />
-            </div>
             <div className="p-8 md:p-10">
               <h3 className="h-display text-2xl font-semibold md:text-3xl text-foreground">
                 {current.name}
               </h3>
               {current.description.includes("<") || current.description.includes("\n") ? (
-                <div 
+                <div
                   className="mt-3 max-w-2xl text-muted-foreground leading-relaxed whitespace-pre-wrap text-sm"
                   dangerouslySetInnerHTML={{ __html: current.description }}
                 />
@@ -657,29 +712,29 @@ function CTA() {
   return (
     <section className="mx-auto max-w-7xl px-6 pb-24 md:px-10">
       <Reveal>
-        <div className="relative overflow-hidden rounded-3xl border border-primary/25 bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 px-8 py-16 text-center text-foreground md:px-16 md:py-24 shadow-2xl">
-          {/* Dynamic inner glow portals */}
-          <div className="absolute -top-24 -left-24 h-48 w-48 rounded-full bg-primary/20 blur-[60px]" />
-          <div className="absolute -bottom-24 -right-24 h-48 w-48 rounded-full bg-purple-500/20 blur-[60px]" />
+        <div className="relative overflow-hidden rounded-3xl border border-primary/20 bg-gradient-to-br from-card via-card/50 to-surface px-8 py-16 text-center text-foreground md:px-16 md:py-24 shadow-2xl backdrop-blur-sm">
+          {/* Dynamic ambient inner glow portals */}
+          <div className="absolute -top-24 -left-24 h-48 w-48 rounded-full bg-primary/15 blur-[60px] pointer-events-none" />
+          <div className="absolute -bottom-24 -right-24 h-48 w-48 rounded-full bg-purple-500/15 blur-[60px] pointer-events-none" />
 
-          <p className="eyebrow text-primary/80 font-medium tracking-wider">Ready when you are</p>
-          <h2 className="h-display mx-auto mt-4 max-w-2xl text-4xl font-semibold md:font-bold text-white md:text-5xl">
+          <p className="eyebrow text-primary font-medium tracking-wider">Ready when you are</p>
+          <h2 className="h-display mx-auto mt-4 max-w-2xl text-4xl font-extrabold text-foreground md:text-5xl tracking-tight leading-tight">
             Ready To Launch Your Business?
           </h2>
-          <p className="mx-auto mt-4 max-w-xl text-slate-300 leading-relaxed">
+          <p className="mx-auto mt-4 max-w-xl text-muted-foreground leading-relaxed text-sm md:text-base">
             Tell us where you're at — incorporation, compliance, or legal documentation. We'll map
             out the next steps in a free 30-minute call.
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             <Link
               to="/contact"
-              className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3.5 text-sm font-medium text-slate-950 shadow-lg shadow-white/5 transition-transform duration-300 hover:scale-[1.02] hover:bg-slate-50"
+              className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground shadow-md shadow-primary/15 transition-transform duration-300 hover:scale-[1.02]"
             >
               Talk To Expert <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
               to="/services"
-              className="inline-flex items-center rounded-full border border-white/20 px-6 py-3.5 text-sm font-medium text-white backdrop-blur-sm transition-all duration-300 hover:bg-white/10"
+              className="inline-flex items-center rounded-full border border-border bg-background/50 px-6 py-3.5 text-sm font-semibold text-foreground backdrop-blur-sm transition-all duration-300 hover:bg-muted/80"
             >
               Get Started
             </Link>

@@ -6,7 +6,7 @@ export function Footer() {
       <div className="mx-auto grid max-w-7xl gap-12 px-6 py-16 md:grid-cols-4 md:px-10">
         <div className="md:col-span-1">
           <div className="flex items-center gap-2">
-            <span className="font-display text-lg tracking-tight">StartUpOnTheWay</span>
+            <img src="/media/logo.png" alt="Logo" className="h-30 w-auto object-contain" />
           </div>
           <p className="mt-4 max-w-xs text-sm text-muted-foreground">
             Premium startup registration, compliance, and legal advisory — built for founders who
@@ -42,8 +42,13 @@ export function Footer() {
               </Link>
             </li>
             <li>
-              <Link to="/blogs" className="text-foreground/80 hover:text-foreground">
-                Blog
+              <Link to="/vlogs" className="text-foreground/80 hover:text-foreground">
+                Vlog
+              </Link>
+            </li>
+            <li>
+              <Link to="/wealth-creation" className="text-foreground/80 hover:text-foreground">
+                Wealth Creation
               </Link>
             </li>
             <li>
@@ -66,7 +71,7 @@ export function Footer() {
 
       <div className="border-t border-border">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-2 px-6 py-6 text-xs text-muted-foreground md:flex-row md:px-10">
-          <p>© {new Date().getFullYear()} StartUpOnTheWay. All rights reserved.</p>
+          <p>© {new Date().getFullYear()}. All rights reserved.</p>
           <p>Built with care for founders.</p>
         </div>
       </div>
