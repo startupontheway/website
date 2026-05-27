@@ -100,28 +100,32 @@ const DEFAULT_TIPS: InvestmentTip[] = [
     id: "tip-1",
     title: "The Power of Compounding via SIP",
     category: "Mutual Funds",
-    content: "<p>Compounding is often called the eighth wonder of the world. By starting a Systematic Investment Plan (SIP) early, you allow your interest to earn interest over time. For example, investing ₹10,000 monthly for 20 years at a 12% expected annual return could grow to over ₹99 Lakhs, with your own investment being only ₹24 Lakhs.</p><strong>Key Takeaways:</strong><ul><li>Start early: Even a 5-year delay can cut your final corpus by half.</li><li>Consistency: Automate your monthly investments to remove emotional bias.</li><li>Top-up: Increase your SIP by 5-10% every year as your income grows.</li></ul>",
+    content:
+      "<p>Compounding is often called the eighth wonder of the world. By starting a Systematic Investment Plan (SIP) early, you allow your interest to earn interest over time. For example, investing ₹10,000 monthly for 20 years at a 12% expected annual return could grow to over ₹99 Lakhs, with your own investment being only ₹24 Lakhs.</p><strong>Key Takeaways:</strong><ul><li>Start early: Even a 5-year delay can cut your final corpus by half.</li><li>Consistency: Automate your monthly investments to remove emotional bias.</li><li>Top-up: Increase your SIP by 5-10% every year as your income grows.</li></ul>",
     created_at: new Date().toISOString(),
   },
   {
     id: "tip-2",
     title: "Tax Saving under Section 80C & Beyond",
     category: "Tax Planning",
-    content: "<p>Smart tax planning is the first step to wealth creation. Under Section 80C of the Income Tax Act, you can deduct up to ₹1.5 Lakhs from your taxable income. Key instruments include ELSS Mutual Funds (which have the shortest lock-in period of 3 years), PPF, and National Savings Certificates.</p><strong>Best Tax-Saving Strategies:</strong><ul><li>ELSS Funds: Benefit from equity returns while saving tax.</li><li>NPS (Section 80CCD(1B)): Save an additional ₹50,000 on top of the 80C limit.</li><li>Health Insurance (Section 80D): Claim deductions on premium paid for self and parents.</li></ul>",
+    content:
+      "<p>Smart tax planning is the first step to wealth creation. Under Section 80C of the Income Tax Act, you can deduct up to ₹1.5 Lakhs from your taxable income. Key instruments include ELSS Mutual Funds (which have the shortest lock-in period of 3 years), PPF, and National Savings Certificates.</p><strong>Best Tax-Saving Strategies:</strong><ul><li>ELSS Funds: Benefit from equity returns while saving tax.</li><li>NPS (Section 80CCD(1B)): Save an additional ₹50,000 on top of the 80C limit.</li><li>Health Insurance (Section 80D): Claim deductions on premium paid for self and parents.</li></ul>",
     created_at: new Date().toISOString(),
   },
   {
     id: "tip-3",
     title: "Emergency Funds: Your Financial Shield",
     category: "Smart Savings",
-    content: "<p>Before allocating money to high-yield equity funds, ensure you have an emergency fund. This fund should cover at least 6 months of your unavoidable monthly expenses (rent, food, EMIs, insurance premiums). Keep this money in liquid mutual funds or high-yield savings accounts that offer immediate access.</p><strong>Tips for Emergency Fund:</strong><ul><li>Calculate accurately: Include all essential bills and healthcare premiums.</li><li>High Liquidity: Do not lock it in long-term FDs or equity.</li><li>Replenish first: If you draw from it, make refilling it your number one priority.</li></ul>",
+    content:
+      "<p>Before allocating money to high-yield equity funds, ensure you have an emergency fund. This fund should cover at least 6 months of your unavoidable monthly expenses (rent, food, EMIs, insurance premiums). Keep this money in liquid mutual funds or high-yield savings accounts that offer immediate access.</p><strong>Tips for Emergency Fund:</strong><ul><li>Calculate accurately: Include all essential bills and healthcare premiums.</li><li>High Liquidity: Do not lock it in long-term FDs or equity.</li><li>Replenish first: If you draw from it, make refilling it your number one priority.</li></ul>",
     created_at: new Date().toISOString(),
   },
   {
     id: "tip-4",
     title: "Equity vs Debt: Finding the Right Asset Mix",
     category: "Asset Allocation",
-    content: "<p>An optimal asset allocation protects you from market volatility. Younger investors can afford to allocate 70-80% of their savings to equities for long-term growth, whereas those closer to retirement should skew towards debt or fixed income for stability.</p><strong>Allocation Rules of Thumb:</strong><ul><li>Rule of 100: Subtract your age from 100 to find your ideal equity allocation percentage.</li><li>Rebalance annually: Shift gains from equity to debt (or vice versa) to maintain your target mix.</li><li>Diversify globally: Allocate 10-15% in international funds to hedge geographic risk.</li></ul>",
+    content:
+      "<p>An optimal asset allocation protects you from market volatility. Younger investors can afford to allocate 70-80% of their savings to equities for long-term growth, whereas those closer to retirement should skew towards debt or fixed income for stability.</p><strong>Allocation Rules of Thumb:</strong><ul><li>Rule of 100: Subtract your age from 100 to find your ideal equity allocation percentage.</li><li>Rebalance annually: Shift gains from equity to debt (or vice versa) to maintain your target mix.</li><li>Diversify globally: Allocate 10-15% in international funds to hedge geographic risk.</li></ul>",
     created_at: new Date().toISOString(),
   },
 ];
@@ -167,7 +171,7 @@ const insertHtmlTag = (
   tag: string,
   value: string,
   setValue: (v: string) => void,
-  textareaId: string
+  textareaId: string,
 ) => {
   const textarea = document.getElementById(textareaId) as HTMLTextAreaElement;
   if (!textarea) return;
@@ -176,7 +180,7 @@ const insertHtmlTag = (
   const end = textarea.selectionEnd;
   const text = textarea.value;
   const selectedText = text.substring(start, end);
-  
+
   let replacement = "";
   if (tag === "b") {
     replacement = `<strong>${selectedText || "bold text"}</strong>`;
@@ -255,11 +259,12 @@ function AdminPage() {
   const [newBlogContent, setNewBlogContent] = useState("");
   const [newBlogCategory, setNewBlogCategory] = useState("");
   const [newBlogVideoUrl, setNewBlogVideoUrl] = useState("");
+  const [editingBlog, setEditingBlog] = useState<Blog | null>(null);
 
   // Services dynamic tab state
   const [servicesList, setServicesList] = useState<ServiceItem[]>([]);
   const [serviceSubTab, setServiceSubTab] = useState<"list" | "add">("list");
-  
+
   // Add Service Form State
   const [newServiceName, setNewServiceName] = useState("");
   const [newServiceSlug, setNewServiceSlug] = useState("");
@@ -311,45 +316,29 @@ function AdminPage() {
     // Create channel to listen for changes on leads, vlogs, and services
     const channel = supabase
       .channel("admin-realtime-dashboard")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "leads" },
-        (payload) => {
-          console.log("Realtime leads update received:", payload);
-          fetchDashboardData(true); // Silent update in background!
-        }
-      )
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "vlogs" },
-        (payload) => {
-          console.log("Realtime vlogs update received:", payload);
-          fetchDashboardData(true); // Silent update in background!
-        }
-      )
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "services" },
-        (payload) => {
-          console.log("Realtime services update received:", payload);
-          fetchDashboardData(true); // Silent update in background!
-        }
-      )
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "news" },
-        (payload) => {
-          console.log("Realtime news update received:", payload);
-          fetchDashboardData(true); // Silent update in background!
-        }
-      )
+      .on("postgres_changes", { event: "*", schema: "public", table: "leads" }, (payload) => {
+        console.log("Realtime leads update received:", payload);
+        fetchDashboardData(true); // Silent update in background!
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "vlogs" }, (payload) => {
+        console.log("Realtime vlogs update received:", payload);
+        fetchDashboardData(true); // Silent update in background!
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "services" }, (payload) => {
+        console.log("Realtime services update received:", payload);
+        fetchDashboardData(true); // Silent update in background!
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "news" }, (payload) => {
+        console.log("Realtime news update received:", payload);
+        fetchDashboardData(true); // Silent update in background!
+      })
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "investment_tips" },
         (payload) => {
           console.log("Realtime tips update received:", payload);
           fetchDashboardData(true); // Silent update in background!
-        }
+        },
       )
       .subscribe();
 
@@ -609,11 +598,13 @@ function AdminPage() {
       return;
     }
 
-    const slug = newServiceSlug.trim() || newServiceName
-      .toLowerCase()
-      .trim()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/(^-|-$)/g, "");
+    const slug =
+      newServiceSlug.trim() ||
+      newServiceName
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)/g, "");
 
     try {
       const { data, error } = await supabase
@@ -668,7 +659,7 @@ function AdminPage() {
 
       if (error) throw error;
       toast.success(`Service "${editServiceName}" updated successfully!`);
-      
+
       // Update local state
       setServicesList(
         servicesList.map((s) =>
@@ -682,8 +673,8 @@ function AdminPage() {
                 image_url: editServiceImageUrl || null,
                 process: editServiceProcess,
               }
-            : s
-        )
+            : s,
+        ),
       );
 
       setEditingService(null);
@@ -739,7 +730,7 @@ function AdminPage() {
 
   const handleFileUpload = async (
     e: React.ChangeEvent<HTMLInputElement>,
-    setUrl: (url: string) => void
+    setUrl: (url: string) => void,
   ) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -756,9 +747,9 @@ function AdminPage() {
 
       if (uploadError) throw uploadError;
 
-      const { data: { publicUrl } } = supabase.storage
-        .from("blog-images")
-        .getPublicUrl(filePath);
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from("blog-images").getPublicUrl(filePath);
 
       setUrl(publicUrl);
       toast.success("Image uploaded successfully!");
@@ -834,6 +825,60 @@ function AdminPage() {
     );
   };
 
+  const startEditBlog = (blog: Blog) => {
+    setEditingBlog(blog);
+    setNewBlogTitle(blog.title);
+    setNewBlogSlug(blog.slug);
+    setNewBlogExcerpt(blog.excerpt || "");
+    setNewBlogContent(blog.content);
+    setNewBlogCategory(blog.category_id || "");
+    setNewBlogVideoUrl(blog.video_url || "");
+  };
+
+  const cancelEditBlog = () => {
+    setEditingBlog(null);
+    setNewBlogTitle("");
+    setNewBlogSlug("");
+    setNewBlogExcerpt("");
+    setNewBlogContent("");
+    setNewBlogCategory("");
+    setNewBlogVideoUrl("");
+  };
+
+  const handleUpdateBlog = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingBlog) return;
+    if (!newBlogTitle.trim() || !newBlogSlug.trim() || !newBlogContent.trim()) {
+      toast.error("Please fill in all required fields.");
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from("vlogs")
+        .update({
+          title: newBlogTitle,
+          slug: newBlogSlug,
+          excerpt: newBlogExcerpt || null,
+          content: newBlogContent,
+          category_id: newBlogCategory || null,
+          video_url: newBlogVideoUrl || null,
+        })
+        .eq("id", editingBlog.id)
+        .select();
+
+      if (error) throw error;
+      toast.success("Vlog post updated successfully!");
+      if (data) {
+        setBlogs(blogs.map((b) => (b.id === editingBlog.id ? data[0] : b)));
+      }
+      cancelEditBlog();
+    } catch (err) {
+      const error = err as Error;
+      toast.error(error.message);
+    }
+  };
+
   // Investment Tips Operations
   const handleCreateTip = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -904,7 +949,9 @@ function AdminPage() {
         toast.success("Default tip customized and saved to database!");
         if (data) {
           setInvestmentTips(
-            investmentTips.map((t) => (t.id === editingTip.id ? (data[0] as unknown as InvestmentTip) : t))
+            investmentTips.map((t) =>
+              t.id === editingTip.id ? (data[0] as unknown as InvestmentTip) : t,
+            ),
           );
         }
       } else {
@@ -923,7 +970,9 @@ function AdminPage() {
         toast.success("Investment tip updated successfully!");
         if (data) {
           setInvestmentTips(
-            investmentTips.map((t) => (t.id === editingTip.id ? (data[0] as unknown as InvestmentTip) : t))
+            investmentTips.map((t) =>
+              t.id === editingTip.id ? (data[0] as unknown as InvestmentTip) : t,
+            ),
           );
         }
       }
@@ -948,7 +997,10 @@ function AdminPage() {
         return;
       }
 
-      const { error } = await supabase.from("investment_tips" as any).delete().eq("id", tipId);
+      const { error } = await supabase
+        .from("investment_tips" as any)
+        .delete()
+        .eq("id", tipId);
       if (error) throw error;
       toast.success("Investment tip deleted successfully.");
       setInvestmentTips(investmentTips.filter((t) => t.id !== tipId));
@@ -1035,7 +1087,7 @@ function AdminPage() {
       toast.success("News article updated successfully!");
       if (data) {
         setNewsList(
-          newsList.map((n) => (n.id === editingNews.id ? (data[0] as unknown as NewsItem) : n))
+          newsList.map((n) => (n.id === editingNews.id ? (data[0] as unknown as NewsItem) : n)),
         );
       }
 
@@ -1053,7 +1105,10 @@ function AdminPage() {
   const handleDeleteNews = async (newsId: string, newsTitle: string) => {
     if (!confirm(`Are you sure you want to delete "${newsTitle}"?`)) return;
     try {
-      const { error } = await supabase.from("news" as any).delete().eq("id", newsId);
+      const { error } = await supabase
+        .from("news" as any)
+        .delete()
+        .eq("id", newsId);
       if (error) throw error;
       toast.success("News article deleted successfully.");
       setNewsList(newsList.filter((n) => n.id !== newsId));
@@ -1445,13 +1500,24 @@ function AdminPage() {
             ---------------------------------------------------- */}
         {activeTab === "blogs" && (
           <div className="grid gap-8 lg:grid-cols-[1fr_360px]">
-            {/* Create new vlog form */}
+            {/* Create / Edit vlog form */}
             <div className="rounded-2xl border border-border bg-card/40 backdrop-blur-sm p-6 shadow-card">
               <h3 className="text-base font-semibold text-foreground mb-5 flex items-center gap-2">
-                <Plus className="h-4.5 w-4.5 text-primary" /> Create & Publish Vlog Reel
+                {editingBlog ? (
+                  <>
+                    <Pencil className="h-4.5 w-4.5 text-primary" /> Edit Vlog Reel
+                  </>
+                ) : (
+                  <>
+                    <Plus className="h-4.5 w-4.5 text-primary" /> Create & Publish Vlog Reel
+                  </>
+                )}
               </h3>
 
-              <form onSubmit={handleCreateBlog} className="space-y-4">
+              <form
+                onSubmit={editingBlog ? handleUpdateBlog : handleCreateBlog}
+                className="space-y-4"
+              >
                 <div className="space-y-1.5">
                   <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
                     Vlog Title <span className="text-primary">*</span>
@@ -1504,12 +1570,23 @@ function AdminPage() {
                   />
                 </div>
 
-                <button
-                  type="submit"
-                  className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-primary to-purple-600 px-6 py-3 text-sm font-semibold text-primary-foreground shadow-md shadow-primary/10 transition-transform duration-300 hover:scale-[1.01]"
-                >
-                  Publish Vlog Reel
-                </button>
+                <div className="flex gap-2.5">
+                  <button
+                    type="submit"
+                    className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-primary to-purple-600 px-6 py-3 text-sm font-semibold text-primary-foreground shadow-md shadow-primary/10 transition-transform duration-300 hover:scale-[1.01] cursor-pointer"
+                  >
+                    {editingBlog ? "Update Vlog Reel" : "Publish Vlog Reel"}
+                  </button>
+                  {editingBlog && (
+                    <button
+                      type="button"
+                      onClick={cancelEditBlog}
+                      className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-6 py-3 text-sm font-semibold text-foreground hover:bg-muted transition-colors duration-300 cursor-pointer"
+                    >
+                      Cancel
+                    </button>
+                  )}
+                </div>
               </form>
             </div>
 
@@ -1532,12 +1609,22 @@ function AdminPage() {
                         </span>
                       </div>
                     </div>
-                    <button
-                      onClick={() => handleDeleteBlog(blog.id, blog.title)}
-                      className="rounded-lg p-2 text-rose-500 hover:bg-rose-500/10 transition-colors shrink-0 ml-4 cursor-pointer"
-                    >
-                      <Trash2 className="h-4.5 w-4.5" />
-                    </button>
+                    <div className="flex items-center gap-1.5 shrink-0 ml-4">
+                      <button
+                        onClick={() => startEditBlog(blog)}
+                        className="rounded-lg p-2 text-primary hover:bg-primary/10 transition-colors cursor-pointer"
+                        title="Edit Vlog"
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteBlog(blog.id, blog.title)}
+                        className="rounded-lg p-2 text-rose-500 hover:bg-rose-500/10 transition-colors cursor-pointer"
+                        title="Delete Vlog"
+                      >
+                        <Trash2 className="h-4.5 w-4.5" />
+                      </button>
+                    </div>
                   </div>
                 ))}
                 {blogs.length === 0 && (
@@ -1588,7 +1675,7 @@ function AdminPage() {
             {serviceSubTab === "list" && (
               <div className="rounded-2xl border border-border bg-card/40 backdrop-blur-sm p-6 shadow-card">
                 <h3 className="text-base font-semibold text-foreground mb-4">Active Services</h3>
-                
+
                 <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
                   {servicesList.map((service) => (
                     <div
@@ -1616,8 +1703,12 @@ function AdminPage() {
                       {/* Content details */}
                       <div className="p-5 flex-1 flex flex-col justify-between">
                         <div>
-                          <h4 className="text-base font-bold text-foreground line-clamp-1">{service.name}</h4>
-                          <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{service.short}</p>
+                          <h4 className="text-base font-bold text-foreground line-clamp-1">
+                            {service.name}
+                          </h4>
+                          <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                            {service.short}
+                          </p>
                         </div>
 
                         {/* Action buttons */}
@@ -1628,7 +1719,7 @@ function AdminPage() {
                           >
                             <ExternalLink className="h-3.5 w-3.5" /> View
                           </button>
-                          
+
                           <div className="flex gap-1.5">
                             <button
                               onClick={() => startEditService(service)}
@@ -1638,7 +1729,9 @@ function AdminPage() {
                               <Pencil className="h-4 w-4" />
                             </button>
                             <button
-                              onClick={() => service.id && handleDeleteService(service.id, service.name)}
+                              onClick={() =>
+                                service.id && handleDeleteService(service.id, service.name)
+                              }
                               className="rounded-lg p-2 text-rose-500 hover:bg-rose-500/10 transition-colors"
                               title="Delete Service"
                             >
@@ -1653,7 +1746,9 @@ function AdminPage() {
                   {servicesList.length === 0 && (
                     <div className="col-span-full text-center py-12 text-sm text-muted-foreground bg-muted/20 rounded-2xl border border-dashed border-border/80">
                       <p>No active dynamic services found in Supabase.</p>
-                      <p className="text-xs mt-1">Add your first service to launch dynamic routing!</p>
+                      <p className="text-xs mt-1">
+                        Add your first service to launch dynamic routing!
+                      </p>
                     </div>
                   )}
                 </div>
@@ -1664,7 +1759,7 @@ function AdminPage() {
             {serviceSubTab === "add" && (
               <div className="rounded-2xl border border-border bg-card/40 backdrop-blur-sm p-6 shadow-card max-w-3xl">
                 <h3 className="text-base font-semibold text-foreground mb-4">Add a New Service</h3>
-                
+
                 <form onSubmit={handleCreateService} className="space-y-5">
                   <div className="space-y-1.5">
                     <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
@@ -1679,7 +1774,7 @@ function AdminPage() {
                           e.target.value
                             .toLowerCase()
                             .replace(/[^a-z0-9]+/g, "-")
-                            .replace(/(^-|-$)/g, "")
+                            .replace(/(^-|-$)/g, ""),
                         );
                       }}
                       placeholder="e.g. LLP Registration"
@@ -1922,7 +2017,8 @@ function AdminPage() {
                   Published Tips ({investmentTips.length})
                 </h3>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  View and manage current finance articles displayed on the Wealth Creation frontend. Click to preview.
+                  View and manage current finance articles displayed on the Wealth Creation
+                  frontend. Click to preview.
                 </p>
 
                 <div className="space-y-3 mt-6 max-h-[600px] overflow-y-auto pr-1">
@@ -2000,7 +2096,10 @@ function AdminPage() {
                 </p>
               </div>
 
-              <form onSubmit={editingNews ? handleUpdateNews : handleCreateNews} className="space-y-4">
+              <form
+                onSubmit={editingNews ? handleUpdateNews : handleCreateNews}
+                className="space-y-4"
+              >
                 <div className="space-y-1.5">
                   <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
                     Article Title <span className="text-primary">*</span>
@@ -2058,7 +2157,10 @@ function AdminPage() {
                     onChange={(e) => setNewNewsIsMarquee(e.target.checked)}
                     className="h-4.5 w-4.5 rounded border-border accent-primary bg-transparent cursor-pointer"
                   />
-                  <label htmlFor="newNewsIsMarquee" className="text-xs font-semibold text-foreground cursor-pointer select-none">
+                  <label
+                    htmlFor="newNewsIsMarquee"
+                    className="text-xs font-semibold text-foreground cursor-pointer select-none"
+                  >
                     Pin/Feature in Scrolling Strip
                     <span className="block text-[10px] text-muted-foreground font-normal mt-0.5">
                       Check this to highlight this headline in the homepage ticker.
@@ -2093,7 +2195,8 @@ function AdminPage() {
                   Published News ({newsList.length})
                 </h3>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  View and manage current news articles displayed on the News frontend. Click to preview.
+                  View and manage current news articles displayed on the News frontend. Click to
+                  preview.
                 </p>
 
                 <div className="space-y-3 mt-6 max-h-[600px] overflow-y-auto pr-1">
@@ -2107,7 +2210,11 @@ function AdminPage() {
                         {/* Thumbnail image mini preview */}
                         <div className="w-10 h-10 rounded bg-muted border border-border overflow-hidden shrink-0">
                           {item.image_url ? (
-                            <img src={item.image_url} alt="" className="w-full h-full object-cover" />
+                            <img
+                              src={item.image_url}
+                              alt=""
+                              className="w-full h-full object-cover"
+                            />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center text-primary bg-primary/10">
                               <Newspaper className="h-4.5 w-4.5" />
@@ -2120,7 +2227,10 @@ function AdminPage() {
                               {item.title}
                             </h4>
                             {item.is_marquee && (
-                              <span className="rounded-full bg-primary/10 border border-primary/20 text-[9px] font-bold text-primary px-1.5 py-0.5 tracking-wider uppercase shrink-0 flex items-center gap-0.5" title="Featured in Ticker Marquee">
+                              <span
+                                className="rounded-full bg-primary/10 border border-primary/20 text-[9px] font-bold text-primary px-1.5 py-0.5 tracking-wider uppercase shrink-0 flex items-center gap-0.5"
+                                title="Featured in Ticker Marquee"
+                              >
                                 <Sparkles className="h-2 w-2 text-primary" /> Ticker
                               </span>
                             )}
@@ -2306,9 +2416,9 @@ function AdminPage() {
               <p className="text-[10px] text-muted-foreground">
                 Published on: {new Date(selectedTip.created_at).toLocaleString("en-IN")}
               </p>
-              <div 
+              <div
                 className="prose prose-sm dark:prose-invert max-w-none"
-                dangerouslySetInnerHTML={{ __html: selectedTip.content }} 
+                dangerouslySetInnerHTML={{ __html: selectedTip.content }}
               />
             </div>
 
@@ -2355,9 +2465,9 @@ function AdminPage() {
                   className="w-full h-40 object-cover rounded-xl border border-border"
                 />
               )}
-              <div 
+              <div
                 className="prose prose-sm dark:prose-invert max-w-none text-foreground/80 leading-relaxed space-y-3"
-                dangerouslySetInnerHTML={{ __html: selectedNews.content }} 
+                dangerouslySetInnerHTML={{ __html: selectedNews.content }}
               />
             </div>
 
@@ -2424,11 +2534,16 @@ function AdminPage() {
                   </span>
                   <ol className="grid gap-3 sm:grid-cols-2">
                     {viewingService.process.map((step, idx) => (
-                      <li key={idx} className="flex items-start gap-3 bg-muted/30 rounded-xl p-3 border border-border/60">
+                      <li
+                        key={idx}
+                        className="flex items-start gap-3 bg-muted/30 rounded-xl p-3 border border-border/60"
+                      >
                         <span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-primary/10 text-[10px] font-semibold text-primary">
                           {idx + 1}
                         </span>
-                        <span className="text-foreground/80 text-xs font-medium leading-normal">{step}</span>
+                        <span className="text-foreground/80 text-xs font-medium leading-normal">
+                          {step}
+                        </span>
                       </li>
                     ))}
                   </ol>
@@ -2463,7 +2578,10 @@ function AdminPage() {
               <h3 className="text-base font-bold text-foreground">Edit Service Details</h3>
             </div>
 
-            <form onSubmit={handleUpdateService} className="flex-1 overflow-y-auto p-6 space-y-5 text-sm">
+            <form
+              onSubmit={handleUpdateService}
+              className="flex-1 overflow-y-auto p-6 space-y-5 text-sm"
+            >
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
                   Service Name <span className="text-primary">*</span>
@@ -2477,7 +2595,7 @@ function AdminPage() {
                       e.target.value
                         .toLowerCase()
                         .replace(/[^a-z0-9]+/g, "-")
-                        .replace(/(^-|-$)/g, "")
+                        .replace(/(^-|-$)/g, ""),
                     );
                   }}
                   className="w-full rounded-xl border border-border bg-background/50 px-4 py-2.5 text-sm outline-none focus:border-primary transition-all"

@@ -51,7 +51,7 @@ function ContactPage() {
       <section className="mx-auto max-w-7xl px-6 pt-20 pb-12 md:px-10 md:pt-28">
         <Reveal>
           <p className="eyebrow">Contact</p>
-          <h1 className="h-display mt-3 max-w-3xl text-5xl text-ink md:text-6xl">
+          <h1 className="h-display mt-3 max-w-3xl text-3xl sm:text-5xl text-ink md:text-6xl">
             Let's talk about your business.
           </h1>
           <p className="mt-5 max-w-2xl text-muted-foreground">
@@ -134,13 +134,25 @@ function ContactPage() {
             <p className="eyebrow">Reach us</p>
             <ul className="mt-5 space-y-4 text-sm">
               <li className="flex items-start gap-3">
-                <Mail className="mt-0.5 h-4 w-4 text-primary" /> hello@startupontheway.com
+                <Mail className="mt-0.5 h-4 w-4 text-primary shrink-0" />
+                <a
+                  href="mailto:startupontheway@gmail.com"
+                  className="hover:text-foreground transition-colors break-all"
+                >
+                  startupontheway@gmail.com
+                </a>
               </li>
               <li className="flex items-start gap-3">
-                <Phone className="mt-0.5 h-4 w-4 text-primary" /> +91 90000 00000
+                <Phone className="mt-0.5 h-4 w-4 text-primary shrink-0" />
+                <a href="tel:+919711880271" className="hover:text-foreground transition-colors">
+                  +91 97118 80271
+                </a>
               </li>
               <li className="flex items-start gap-3">
-                <MapPin className="mt-0.5 h-4 w-4 text-primary" /> Bengaluru · Mumbai · Delhi
+                <MapPin className="mt-0.5 h-4 w-4 text-primary shrink-0" />
+                <span className="leading-relaxed">
+                  Sector 88 RPS Palm Drive 12 A first floor, Faridabad - 121002
+                </span>
               </li>
             </ul>
             <div className="mt-8 border-t border-border pt-6 text-sm text-muted-foreground">

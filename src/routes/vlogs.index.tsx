@@ -13,7 +13,8 @@ export const Route = createFileRoute("/vlogs/")({
       { title: "Vlog — StartUpOnTheWay" },
       {
         name: "description",
-        content: "Watch our reels and videos on startup incorporation, compliance, and legal documentation.",
+        content:
+          "Watch our reels and videos on startup incorporation, compliance, and legal documentation.",
       },
       { property: "og:title", content: "Vlog — StartUpOnTheWay" },
       { property: "og:description", content: "Expert startup video guides and reels." },
@@ -28,7 +29,7 @@ function getYouTubeId(url: string) {
   if (!url) return null;
   const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|shorts\/)([^#\&\?]*).*/;
   const match = url.match(regExp);
-  return (match && match[2].length === 11) ? match[2] : null;
+  return match && match[2].length === 11 ? match[2] : null;
 }
 
 function VlogsPage() {
@@ -42,7 +43,9 @@ function VlogsPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("vlogs")
-        .select("id, title, slug, excerpt, content, thumbnail_url, published_at, video_url, video_type, categories(name, slug)")
+        .select(
+          "id, title, slug, excerpt, content, thumbnail_url, published_at, video_url, video_type, categories(name, slug)",
+        )
         .eq("status", "published")
         .order("published_at", { ascending: false });
       if (error) throw error;
@@ -51,7 +54,7 @@ function VlogsPage() {
   });
 
   const filtered = (data ?? []).filter((v) =>
-    q ? (v.title + " " + (v.excerpt ?? "")).toLowerCase().includes(q.toLowerCase()) : true
+    q ? (v.title + " " + (v.excerpt ?? "")).toLowerCase().includes(q.toLowerCase()) : true,
   );
 
   const currentReel = activeReelIndex !== null ? filtered[activeReelIndex] : null;
@@ -60,7 +63,7 @@ function VlogsPage() {
   useEffect(() => {
     if (videoRef.current) {
       videoRef.current.load();
-      videoRef.current.play().catch(err => console.log("Autoplay failed:", err));
+      videoRef.current.play().catch((err) => console.log("Autoplay failed:", err));
     }
   }, [activeReelIndex]);
 
@@ -86,11 +89,12 @@ function VlogsPage() {
       <section className="mx-auto max-w-7xl px-6 pt-20 pb-10 md:px-10 md:pt-28">
         <Reveal>
           <p className="eyebrow">Vlog Channel</p>
-          <h1 className="h-display mt-3 max-w-3xl text-5xl text-ink md:text-6xl">
+          <h1 className="h-display mt-3 max-w-3xl text-3xl sm:text-5xl text-ink md:text-6xl">
             Founder Guides & Startup Shorts
           </h1>
           <p className="mt-4 text-muted-foreground max-w-xl">
-            Bite-sized, portrait video guides on incorporation, taxation, trademarks, and ROC filings.
+            Bite-sized, portrait video guides on incorporation, taxation, trademarks, and ROC
+            filings.
           </p>
           <div className="mt-8 max-w-md">
             <input
@@ -110,13 +114,15 @@ function VlogsPage() {
         ) : filtered.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-border bg-card p-12 text-center">
             <h2 className="h-display text-2xl">No vlogs yet</h2>
-            <p className="mt-2 text-muted-foreground">Check back soon — we're uploading new reels regularly.</p>
+            <p className="mt-2 text-muted-foreground">
+              Check back soon — we're uploading new reels regularly.
+            </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
             {filtered.map((v, i) => {
               const ytId = getYouTubeId(v.video_url || "");
-              const defaultThumb = ytId 
+              const defaultThumb = ytId
                 ? `https://img.youtube.com/vi/${ytId}/maxresdefault.jpg`
                 : "/placeholder.svg";
               const thumbnail = v.thumbnail_url || defaultThumb;
@@ -152,17 +158,17 @@ function VlogsPage() {
                     </div>
 
                     {/* Content Details Overlay */}
-                    <div className="absolute bottom-0 left-0 right-0 p-5 flex flex-col justify-end text-white">
+                    <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-5 flex flex-col justify-end text-white">
                       {v.categories && (
-                        <span className="self-start rounded-full bg-primary/20 backdrop-blur-md px-2.5 py-0.5 text-[10px] font-semibold tracking-wider text-primary border border-primary/30 uppercase">
+                        <span className="self-start rounded-full bg-primary/20 backdrop-blur-md px-1.5 py-0.5 sm:px-2.5 text-[8px] sm:text-[10px] font-semibold tracking-wider text-primary border border-primary/30 uppercase">
                           {(v.categories as { name: string }).name}
                         </span>
                       )}
-                      <h3 className="font-display mt-2 text-lg font-bold leading-tight line-clamp-2 text-shadow">
+                      <h3 className="font-display mt-1 sm:mt-2 text-xs xs:text-sm sm:text-lg font-bold leading-tight line-clamp-2 text-shadow">
                         {v.title}
                       </h3>
                       {v.excerpt && (
-                        <p className="mt-1.5 text-xs text-white/80 line-clamp-2 leading-relaxed">
+                        <p className="mt-1 text-[10px] sm:text-xs text-white/80 line-clamp-1 sm:line-clamp-2 leading-relaxed hidden xs:block">
                           {v.excerpt}
                         </p>
                       )}
@@ -177,12 +183,12 @@ function VlogsPage() {
 
       {/* Immersive Reel Player Modal */}
       {activeReelIndex !== null && currentReel && (
-        <div 
+        <div
           className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 p-4 md:p-6 backdrop-blur-md animate-fade-in"
           onClick={() => setActiveReelIndex(null)}
         >
           {/* Close button */}
-          <button 
+          <button
             className="absolute top-4 right-4 z-50 rounded-full bg-white/10 p-2 text-white hover:bg-white/20 transition-all cursor-pointer"
             onClick={() => setActiveReelIndex(null)}
           >
@@ -190,7 +196,7 @@ function VlogsPage() {
           </button>
 
           {/* Modal Container */}
-          <div 
+          <div
             className="relative flex h-[85vh] w-full max-w-4xl overflow-hidden rounded-2xl bg-zinc-900 border border-zinc-800 text-white shadow-2xl md:flex-row flex-col"
             onClick={(e) => e.stopPropagation()}
           >
@@ -216,11 +222,15 @@ function VlogsPage() {
                     className="h-full max-w-full object-contain aspect-[9/16]"
                   />
                   {/* Sound Toggle Overlay */}
-                  <button 
+                  <button
                     onClick={() => setIsMuted(!isMuted)}
                     className="absolute bottom-4 right-4 rounded-full bg-black/60 p-2 text-white hover:bg-black/80 transition-all"
                   >
-                    {isMuted ? <VolumeX className="h-4.5 w-4.5" /> : <Volume2 className="h-4.5 w-4.5" />}
+                    {isMuted ? (
+                      <VolumeX className="h-4.5 w-4.5" />
+                    ) : (
+                      <Volume2 className="h-4.5 w-4.5" />
+                    )}
                   </button>
                 </div>
               )}
@@ -258,7 +268,7 @@ function VlogsPage() {
                       {new Date(currentReel.published_at).toLocaleDateString(undefined, {
                         month: "short",
                         day: "numeric",
-                        year: "numeric"
+                        year: "numeric",
                       })}
                     </span>
                   )}

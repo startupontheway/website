@@ -22,7 +22,8 @@ export const Route = createFileRoute("/wealth-creation")({
       { title: "Wealth Creation & Calculators — StartUpOnTheWay" },
       {
         name: "description",
-        content: "Smart tools and expert advice to build your financial future. Compute compounding, EMIs, and read curated investment tips.",
+        content:
+          "Smart tools and expert advice to build your financial future. Compute compounding, EMIs, and read curated investment tips.",
       },
     ],
     links: [{ rel: "canonical", href: "/wealth-creation" }],
@@ -43,28 +44,32 @@ const DEFAULT_TIPS: InvestmentTip[] = [
     id: "tip-1",
     title: "The Power of Compounding via SIP",
     category: "Mutual Funds",
-    content: "<p>Compounding is often called the eighth wonder of the world. By starting a Systematic Investment Plan (SIP) early, you allow your interest to earn interest over time. For example, investing ₹10,000 monthly for 20 years at a 12% expected annual return could grow to over ₹99 Lakhs, with your own investment being only ₹24 Lakhs.</p><strong>Key Takeaways:</strong><ul><li>Start early: Even a 5-year delay can cut your final corpus by half.</li><li>Consistency: Automate your monthly investments to remove emotional bias.</li><li>Top-up: Increase your SIP by 5-10% every year as your income grows.</li></ul>",
+    content:
+      "<p>Compounding is often called the eighth wonder of the world. By starting a Systematic Investment Plan (SIP) early, you allow your interest to earn interest over time. For example, investing ₹10,000 monthly for 20 years at a 12% expected annual return could grow to over ₹99 Lakhs, with your own investment being only ₹24 Lakhs.</p><strong>Key Takeaways:</strong><ul><li>Start early: Even a 5-year delay can cut your final corpus by half.</li><li>Consistency: Automate your monthly investments to remove emotional bias.</li><li>Top-up: Increase your SIP by 5-10% every year as your income grows.</li></ul>",
     created_at: new Date().toISOString(),
   },
   {
     id: "tip-2",
     title: "Tax Saving under Section 80C & Beyond",
     category: "Tax Planning",
-    content: "<p>Smart tax planning is the first step to wealth creation. Under Section 80C of the Income Tax Act, you can deduct up to ₹1.5 Lakhs from your taxable income. Key instruments include ELSS Mutual Funds (which have the shortest lock-in period of 3 years), PPF, and National Savings Certificates.</p><strong>Best Tax-Saving Strategies:</strong><ul><li>ELSS Funds: Benefit from equity returns while saving tax.</li><li>NPS (Section 80CCD(1B)): Save an additional ₹50,000 on top of the 80C limit.</li><li>Health Insurance (Section 80D): Claim deductions on premium paid for self and parents.</li></ul>",
+    content:
+      "<p>Smart tax planning is the first step to wealth creation. Under Section 80C of the Income Tax Act, you can deduct up to ₹1.5 Lakhs from your taxable income. Key instruments include ELSS Mutual Funds (which have the shortest lock-in period of 3 years), PPF, and National Savings Certificates.</p><strong>Best Tax-Saving Strategies:</strong><ul><li>ELSS Funds: Benefit from equity returns while saving tax.</li><li>NPS (Section 80CCD(1B)): Save an additional ₹50,000 on top of the 80C limit.</li><li>Health Insurance (Section 80D): Claim deductions on premium paid for self and parents.</li></ul>",
     created_at: new Date().toISOString(),
   },
   {
     id: "tip-3",
     title: "Emergency Funds: Your Financial Shield",
     category: "Smart Savings",
-    content: "<p>Before allocating money to high-yield equity funds, ensure you have an emergency fund. This fund should cover at least 6 months of your unavoidable monthly expenses (rent, food, EMIs, insurance premiums). Keep this money in liquid mutual funds or high-yield savings accounts that offer immediate access.</p><strong>Tips for Emergency Fund:</strong><ul><li>Calculate accurately: Include all essential bills and healthcare premiums.</li><li>High Liquidity: Do not lock it in long-term FDs or equity.</li><li>Replenish first: If you draw from it, make refilling it your number one priority.</li></ul>",
+    content:
+      "<p>Before allocating money to high-yield equity funds, ensure you have an emergency fund. This fund should cover at least 6 months of your unavoidable monthly expenses (rent, food, EMIs, insurance premiums). Keep this money in liquid mutual funds or high-yield savings accounts that offer immediate access.</p><strong>Tips for Emergency Fund:</strong><ul><li>Calculate accurately: Include all essential bills and healthcare premiums.</li><li>High Liquidity: Do not lock it in long-term FDs or equity.</li><li>Replenish first: If you draw from it, make refilling it your number one priority.</li></ul>",
     created_at: new Date().toISOString(),
   },
   {
     id: "tip-4",
     title: "Equity vs Debt: Finding the Right Asset Mix",
     category: "Asset Allocation",
-    content: "<p>An optimal asset allocation protects you from market volatility. Younger investors can afford to allocate 70-80% of their savings to equities for long-term growth, whereas those closer to retirement should skew towards debt or fixed income for stability.</p><strong>Allocation Rules of Thumb:</strong><ul><li>Rule of 100: Subtract your age from 100 to find your ideal equity allocation percentage.</li><li>Rebalance annually: Shift gains from equity to debt (or vice versa) to maintain your target mix.</li><li>Diversify globally: Allocate 10-15% in international funds to hedge geographic risk.</li></ul>",
+    content:
+      "<p>An optimal asset allocation protects you from market volatility. Younger investors can afford to allocate 70-80% of their savings to equities for long-term growth, whereas those closer to retirement should skew towards debt or fixed income for stability.</p><strong>Allocation Rules of Thumb:</strong><ul><li>Rule of 100: Subtract your age from 100 to find your ideal equity allocation percentage.</li><li>Rebalance annually: Shift gains from equity to debt (or vice versa) to maintain your target mix.</li><li>Diversify globally: Allocate 10-15% in international funds to hedge geographic risk.</li></ul>",
     created_at: new Date().toISOString(),
   },
 ];
@@ -135,7 +140,8 @@ function WealthCreationPage() {
   const getSipResult = () => {
     const monthlyRate = sipRate / 12 / 100;
     const months = sipYears * 12;
-    const totalValue = sipMonthly * ((Math.pow(1 + monthlyRate, months) - 1) / monthlyRate) * (1 + monthlyRate);
+    const totalValue =
+      sipMonthly * ((Math.pow(1 + monthlyRate, months) - 1) / monthlyRate) * (1 + monthlyRate);
     const investedAmount = sipMonthly * months;
     const estimatedReturns = Math.max(0, totalValue - investedAmount);
     return { investedAmount, estimatedReturns, totalValue };
@@ -153,7 +159,10 @@ function WealthCreationPage() {
   const getEmiResult = () => {
     const monthlyRate = emiRate / 12 / 100;
     const months = emiYears * 12;
-    const emi = emiLoan * monthlyRate * (Math.pow(1 + monthlyRate, months) / (Math.pow(1 + monthlyRate, months) - 1));
+    const emi =
+      emiLoan *
+      monthlyRate *
+      (Math.pow(1 + monthlyRate, months) / (Math.pow(1 + monthlyRate, months) - 1));
     const totalPayment = emi * months;
     const totalInterest = Math.max(0, totalPayment - emiLoan);
     return { emi, totalInterest, totalPayment };
@@ -188,11 +197,15 @@ function WealthCreationPage() {
           <span className="eyebrow inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold uppercase tracking-wider mb-4 border border-primary/20">
             <TrendingUp className="h-3.5 w-3.5" /> Wealth Creation Studio
           </span>
-          <h1 className="h-display text-4xl font-extrabold text-foreground md:text-6xl tracking-tight leading-none">
-            Grow Your Savings, <span className="bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">Smarter.</span>
+          <h1 className="h-display text-3xl font-extrabold text-foreground sm:text-5xl md:text-6xl tracking-tight leading-none">
+            Grow Your Savings,{" "}
+            <span className="bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
+              Smarter.
+            </span>
           </h1>
-          <p className="mt-5 max-w-xl mx-auto text-muted-foreground text-base md:text-lg leading-relaxed">
-            Use our interactive fintech calculators to forecast compounding interest, plan EMI repayments, and read professional tax-saving guides.
+          <p className="mt-5 max-w-xl mx-auto text-muted-foreground text-sm sm:text-base md:text-lg leading-relaxed">
+            Use our interactive fintech calculators to forecast compounding interest, plan EMI
+            repayments, and read professional tax-saving guides.
           </p>
         </Reveal>
       </section>
@@ -305,16 +318,28 @@ function WealthCreationPage() {
                   <div className="flex flex-col justify-between bg-muted/20 border border-border/80 rounded-2xl p-5 md:p-6">
                     <div className="space-y-4">
                       <div>
-                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">Invested Amount</span>
-                        <p className="text-lg font-bold text-foreground mt-0.5">{formatINR(getSipResult().investedAmount)}</p>
+                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">
+                          Invested Amount
+                        </span>
+                        <p className="text-lg font-bold text-foreground mt-0.5">
+                          {formatINR(getSipResult().investedAmount)}
+                        </p>
                       </div>
                       <div>
-                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">Est. Returns</span>
-                        <p className="text-lg font-bold text-emerald-500 mt-0.5">+{formatINR(getSipResult().estimatedReturns)}</p>
+                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">
+                          Est. Returns
+                        </span>
+                        <p className="text-lg font-bold text-emerald-500 mt-0.5">
+                          +{formatINR(getSipResult().estimatedReturns)}
+                        </p>
                       </div>
                       <div className="border-t border-border pt-4">
-                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">Total Future Value</span>
-                        <p className="text-2xl font-black text-foreground mt-0.5">{formatINR(getSipResult().totalValue)}</p>
+                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">
+                          Total Future Value
+                        </span>
+                        <p className="text-2xl font-black text-foreground mt-0.5">
+                          {formatINR(getSipResult().totalValue)}
+                        </p>
                       </div>
                     </div>
 
@@ -323,16 +348,26 @@ function WealthCreationPage() {
                       <div className="h-2 w-full rounded-full bg-muted overflow-hidden flex">
                         <div
                           className="h-full bg-primary/80"
-                          style={{ width: `${(getSipResult().investedAmount / getSipResult().totalValue) * 100}%` }}
+                          style={{
+                            width: `${(getSipResult().investedAmount / getSipResult().totalValue) * 100}%`,
+                          }}
                         />
                         <div
                           className="h-full bg-emerald-400"
-                          style={{ width: `${(getSipResult().estimatedReturns / getSipResult().totalValue) * 100}%` }}
+                          style={{
+                            width: `${(getSipResult().estimatedReturns / getSipResult().totalValue) * 100}%`,
+                          }}
                         />
                       </div>
                       <div className="flex justify-between text-[9px] font-medium text-muted-foreground">
-                        <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-primary inline-block" /> Invested</span>
-                        <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-emerald-400 inline-block" /> Returns</span>
+                        <span className="flex items-center gap-1">
+                          <span className="h-1.5 w-1.5 rounded-full bg-primary inline-block" />{" "}
+                          Invested
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 inline-block" />{" "}
+                          Returns
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -408,16 +443,28 @@ function WealthCreationPage() {
                   <div className="flex flex-col justify-between bg-muted/20 border border-border/80 rounded-2xl p-5 md:p-6">
                     <div className="space-y-4">
                       <div>
-                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">Invested Amount</span>
-                        <p className="text-lg font-bold text-foreground mt-0.5">{formatINR(getLumpsumResult().investedAmount)}</p>
+                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">
+                          Invested Amount
+                        </span>
+                        <p className="text-lg font-bold text-foreground mt-0.5">
+                          {formatINR(getLumpsumResult().investedAmount)}
+                        </p>
                       </div>
                       <div>
-                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">Est. Returns</span>
-                        <p className="text-lg font-bold text-emerald-500 mt-0.5">+{formatINR(getLumpsumResult().estimatedReturns)}</p>
+                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">
+                          Est. Returns
+                        </span>
+                        <p className="text-lg font-bold text-emerald-500 mt-0.5">
+                          +{formatINR(getLumpsumResult().estimatedReturns)}
+                        </p>
                       </div>
                       <div className="border-t border-border pt-4">
-                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">Total Future Value</span>
-                        <p className="text-2xl font-black text-foreground mt-0.5">{formatINR(getLumpsumResult().totalValue)}</p>
+                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">
+                          Total Future Value
+                        </span>
+                        <p className="text-2xl font-black text-foreground mt-0.5">
+                          {formatINR(getLumpsumResult().totalValue)}
+                        </p>
                       </div>
                     </div>
 
@@ -426,16 +473,26 @@ function WealthCreationPage() {
                       <div className="h-2 w-full rounded-full bg-muted overflow-hidden flex">
                         <div
                           className="h-full bg-primary/80"
-                          style={{ width: `${(getLumpsumResult().investedAmount / getLumpsumResult().totalValue) * 100}%` }}
+                          style={{
+                            width: `${(getLumpsumResult().investedAmount / getLumpsumResult().totalValue) * 100}%`,
+                          }}
                         />
                         <div
                           className="h-full bg-emerald-400"
-                          style={{ width: `${(getLumpsumResult().estimatedReturns / getLumpsumResult().totalValue) * 100}%` }}
+                          style={{
+                            width: `${(getLumpsumResult().estimatedReturns / getLumpsumResult().totalValue) * 100}%`,
+                          }}
                         />
                       </div>
                       <div className="flex justify-between text-[9px] font-medium text-muted-foreground">
-                        <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-primary inline-block" /> Invested</span>
-                        <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-emerald-400 inline-block" /> Returns</span>
+                        <span className="flex items-center gap-1">
+                          <span className="h-1.5 w-1.5 rounded-full bg-primary inline-block" />{" "}
+                          Invested
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 inline-block" />{" "}
+                          Returns
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -511,21 +568,37 @@ function WealthCreationPage() {
                   <div className="flex flex-col justify-between bg-muted/20 border border-border/80 rounded-2xl p-5 md:p-6">
                     <div className="space-y-4">
                       <div>
-                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">Monthly EMI</span>
-                        <p className="text-2xl font-black text-primary mt-0.5">{formatINR(getEmiResult().emi)}</p>
+                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">
+                          Monthly EMI
+                        </span>
+                        <p className="text-2xl font-black text-primary mt-0.5">
+                          {formatINR(getEmiResult().emi)}
+                        </p>
                       </div>
                       <div className="border-t border-border pt-4 space-y-3">
                         <div>
-                          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">Principal Amount</span>
-                          <p className="text-sm font-bold text-foreground mt-0.5">{formatINR(emiLoan)}</p>
+                          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">
+                            Principal Amount
+                          </span>
+                          <p className="text-sm font-bold text-foreground mt-0.5">
+                            {formatINR(emiLoan)}
+                          </p>
                         </div>
                         <div>
-                          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">Total Interest Payable</span>
-                          <p className="text-sm font-bold text-purple-500 mt-0.5">{formatINR(getEmiResult().totalInterest)}</p>
+                          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">
+                            Total Interest Payable
+                          </span>
+                          <p className="text-sm font-bold text-purple-500 mt-0.5">
+                            {formatINR(getEmiResult().totalInterest)}
+                          </p>
                         </div>
                         <div>
-                          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">Total Payment (P + I)</span>
-                          <p className="text-base font-bold text-foreground mt-0.5">{formatINR(getEmiResult().totalPayment)}</p>
+                          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">
+                            Total Payment (P + I)
+                          </span>
+                          <p className="text-base font-bold text-foreground mt-0.5">
+                            {formatINR(getEmiResult().totalPayment)}
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -539,12 +612,20 @@ function WealthCreationPage() {
                         />
                         <div
                           className="h-full bg-purple-400"
-                          style={{ width: `${(getEmiResult().totalInterest / getEmiResult().totalPayment) * 100}%` }}
+                          style={{
+                            width: `${(getEmiResult().totalInterest / getEmiResult().totalPayment) * 100}%`,
+                          }}
                         />
                       </div>
                       <div className="flex justify-between text-[9px] font-medium text-muted-foreground">
-                        <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-primary inline-block" /> Principal</span>
-                        <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-purple-400 inline-block" /> Interest</span>
+                        <span className="flex items-center gap-1">
+                          <span className="h-1.5 w-1.5 rounded-full bg-primary inline-block" />{" "}
+                          Principal
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <span className="h-1.5 w-1.5 rounded-full bg-purple-400 inline-block" />{" "}
+                          Interest
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -620,16 +701,28 @@ function WealthCreationPage() {
                   <div className="flex flex-col justify-between bg-muted/20 border border-border/80 rounded-2xl p-5 md:p-6">
                     <div className="space-y-4">
                       <div>
-                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">Invested Amount</span>
-                        <p className="text-lg font-bold text-foreground mt-0.5">{formatINR(getFdResult().investedAmount)}</p>
+                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">
+                          Invested Amount
+                        </span>
+                        <p className="text-lg font-bold text-foreground mt-0.5">
+                          {formatINR(getFdResult().investedAmount)}
+                        </p>
                       </div>
                       <div>
-                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">Interest Earned</span>
-                        <p className="text-lg font-bold text-emerald-500 mt-0.5">+{formatINR(getFdResult().interestEarned)}</p>
+                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">
+                          Interest Earned
+                        </span>
+                        <p className="text-lg font-bold text-emerald-500 mt-0.5">
+                          +{formatINR(getFdResult().interestEarned)}
+                        </p>
                       </div>
                       <div className="border-t border-border pt-4">
-                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">Maturity Value</span>
-                        <p className="text-2xl font-black text-foreground mt-0.5">{formatINR(getFdResult().maturityValue)}</p>
+                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">
+                          Maturity Value
+                        </span>
+                        <p className="text-2xl font-black text-foreground mt-0.5">
+                          {formatINR(getFdResult().maturityValue)}
+                        </p>
                       </div>
                     </div>
 
@@ -642,12 +735,20 @@ function WealthCreationPage() {
                         />
                         <div
                           className="h-full bg-emerald-400"
-                          style={{ width: `${(getFdResult().interestEarned / getFdResult().maturityValue) * 100}%` }}
+                          style={{
+                            width: `${(getFdResult().interestEarned / getFdResult().maturityValue) * 100}%`,
+                          }}
                         />
                       </div>
                       <div className="flex justify-between text-[9px] font-medium text-muted-foreground">
-                        <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-primary inline-block" /> Invested</span>
-                        <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-emerald-400 inline-block" /> Interest</span>
+                        <span className="flex items-center gap-1">
+                          <span className="h-1.5 w-1.5 rounded-full bg-primary inline-block" />{" "}
+                          Invested
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 inline-block" />{" "}
+                          Interest
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -663,7 +764,10 @@ function WealthCreationPage() {
               <div>
                 <h4 className="font-semibold text-foreground mb-1">About our calculations</h4>
                 <p className="text-xs leading-relaxed">
-                  These calculators are for educational purposes. Actual returns depend on market factors, specific mutual fund expense ratios, tax liabilities, or loan amortization policies. Always consult with a certified CA or financial advisor before making investments.
+                  These calculators are for educational purposes. Actual returns depend on market
+                  factors, specific mutual fund expense ratios, tax liabilities, or loan
+                  amortization policies. Always consult with a certified CA or financial advisor
+                  before making investments.
                 </p>
               </div>
             </div>
@@ -738,7 +842,8 @@ function WealthCreationPage() {
                       />
                     </div>
                     <span className="text-[10px] font-semibold text-primary inline-flex items-center gap-1 mt-4">
-                      Read Guide <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" />
+                      Read Guide{" "}
+                      <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" />
                     </span>
                   </button>
                 ))}

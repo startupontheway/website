@@ -12,7 +12,8 @@ export const Route = createFileRoute("/news/")({
       { title: "Latest News & Updates — StartUpOnTheWay" },
       {
         name: "description",
-        content: "Stay updated with the latest news, financial insights, regulatory updates, and startup announcements.",
+        content:
+          "Stay updated with the latest news, financial insights, regulatory updates, and startup announcements.",
       },
     ],
     links: [{ rel: "canonical", href: "/news" }],
@@ -65,9 +66,10 @@ function NewsIndexPage() {
     return tmp.textContent || tmp.innerText || "";
   };
 
-  const filteredNews = news.filter((item) =>
-    item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    stripHtml(item.content).toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredNews = news.filter(
+    (item) =>
+      item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      stripHtml(item.content).toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   return (
@@ -83,13 +85,14 @@ function NewsIndexPage() {
             </span>
           </Reveal>
           <Reveal>
-            <h1 className="h-display text-4xl md:text-5xl font-extrabold text-ink leading-tight">
+            <h1 className="h-display text-3xl sm:text-4xl md:text-5xl font-extrabold text-ink leading-tight">
               Company News & Insights
             </h1>
           </Reveal>
           <Reveal>
             <p className="max-w-2xl mx-auto text-sm md:text-base text-muted-foreground">
-              Stay informed with regulatory changes, company releases, tax advisories, and strategic growth advice.
+              Stay informed with regulatory changes, company releases, tax advisories, and strategic
+              growth advice.
             </p>
           </Reveal>
 

@@ -50,7 +50,7 @@ function ServicesPage() {
       <section className="mx-auto max-w-7xl px-6 pt-16 pb-12 md:px-10 md:pt-24">
         <Reveal>
           <p className="eyebrow">Services</p>
-          <h1 className="h-display mt-3 max-w-3xl text-5xl text-ink md:text-6xl">
+          <h1 className="h-display mt-3 max-w-3xl text-3xl sm:text-5xl text-ink md:text-6xl">
             Everything you need to launch and run a serious business.
           </h1>
           <p className="mt-5 max-w-2xl text-muted-foreground">

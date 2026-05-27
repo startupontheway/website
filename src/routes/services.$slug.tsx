@@ -30,9 +30,12 @@ export const Route = createFileRoute("/services/$slug")({
     meta: loaderData
       ? [
           { title: `${loaderData.service.name} — StartUpOnTheWay` },
-          { name: "description", content: loaderData.service.description.replace(/<[^>]*>/g, '') },
+          { name: "description", content: loaderData.service.description.replace(/<[^>]*>/g, "") },
           { property: "og:title", content: loaderData.service.name },
-          { property: "og:description", content: loaderData.service.description.replace(/<[^>]*>/g, '') },
+          {
+            property: "og:description",
+            content: loaderData.service.description.replace(/<[^>]*>/g, ""),
+          },
         ]
       : [],
     links: loaderData ? [{ rel: "canonical", href: `/services/${loaderData.service.slug}` }] : [],
@@ -73,8 +76,10 @@ function ServicePage() {
           <Link to="/services" className="text-sm text-muted-foreground hover:text-foreground">
             ← Services
           </Link>
-          <h1 className="h-display mt-4 max-w-3xl text-5xl text-ink md:text-6xl">{service.name}</h1>
-          <p className="mt-4 max-w-2xl text-muted-foreground text-lg md:text-xl leading-relaxed">
+          <h1 className="h-display mt-4 max-w-3xl text-3xl sm:text-5xl text-ink md:text-6xl">
+            {service.name}
+          </h1>
+          <p className="mt-4 max-w-2xl text-muted-foreground text-base sm:text-lg md:text-xl leading-relaxed">
             {service.short}
           </p>
         </Reveal>
@@ -88,7 +93,7 @@ function ServicePage() {
               src={service.image_url || servicePreview}
               alt={service.name}
               loading="lazy"
-              className="h-[420px] w-full object-cover"
+              className="aspect-[1.66] md:h-[420px] w-full object-cover"
             />
           </div>
 
@@ -96,7 +101,7 @@ function ServicePage() {
           <div className="mt-8 rounded-2xl border border-border bg-card p-8 shadow-card md:p-10">
             <h3 className="text-lg font-bold text-foreground mb-4">About the Service</h3>
             {service.description.includes("<") || service.description.includes("\n") ? (
-              <div 
+              <div
                 className="prose prose-sm dark:prose-invert max-w-none text-foreground/80 leading-relaxed"
                 dangerouslySetInnerHTML={{ __html: service.description }}
               />
@@ -119,7 +124,9 @@ function ServicePage() {
                   </li>
                 ))
               ) : (
-                <li className="text-muted-foreground text-sm">No custom steps listed. Contact us to learn more.</li>
+                <li className="text-muted-foreground text-sm">
+                  No custom steps listed. Contact us to learn more.
+                </li>
               )}
             </ol>
           </div>

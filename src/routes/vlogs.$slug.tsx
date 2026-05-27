@@ -19,7 +19,7 @@ export const Route = createFileRoute("/vlogs/$slug")({
     <div className="min-h-screen bg-background">
       <Navbar />
       <div className="mx-auto max-w-3xl px-6 py-32 text-center">
-        <h1 className="h-display text-3xl">Couldn't load vlog</h1>
+        <h1 className="h-display text-2xl sm:text-3xl">Couldn't load vlog</h1>
         <p className="mt-2 text-muted-foreground">{error.message}</p>
       </div>
       <Footer />
@@ -31,7 +31,7 @@ function getYouTubeId(url: string) {
   if (!url) return null;
   const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|shorts\/)([^#\&\?]*).*/;
   const match = url.match(regExp);
-  return (match && match[2].length === 11) ? match[2] : null;
+  return match && match[2].length === 11 ? match[2] : null;
 }
 
 function VlogSlugPage() {
@@ -56,9 +56,12 @@ function VlogSlugPage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Navbar />
-      
+
       <article className="mx-auto max-w-5xl px-6 pt-24 pb-24 md:px-10 md:pt-32">
-        <Link to="/vlogs" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-8">
+        <Link
+          to="/vlogs"
+          className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-8"
+        >
           <ChevronLeft className="h-4 w-4" /> Back to channel
         </Link>
 
@@ -66,7 +69,7 @@ function VlogSlugPage() {
           <p className="text-muted-foreground">Loading vlog details…</p>
         ) : !data ? (
           <div className="mt-10">
-            <h1 className="h-display text-4xl">Vlog not found</h1>
+            <h1 className="h-display text-2xl sm:text-4xl">Vlog not found</h1>
           </div>
         ) : (
           <div className="grid gap-10 lg:grid-cols-[400px_1fr]">
@@ -93,11 +96,15 @@ function VlogSlugPage() {
                       muted={isMuted}
                       className="h-full w-full object-contain aspect-[9/16]"
                     />
-                    <button 
+                    <button
                       onClick={() => setIsMuted(!isMuted)}
                       className="absolute bottom-4 right-4 rounded-full bg-black/60 p-2 text-white hover:bg-black/80 transition-all"
                     >
-                      {isMuted ? <VolumeX className="h-4.5 w-4.5" /> : <Volume2 className="h-4.5 w-4.5" />}
+                      {isMuted ? (
+                        <VolumeX className="h-4.5 w-4.5" />
+                      ) : (
+                        <Volume2 className="h-4.5 w-4.5" />
+                      )}
                     </button>
                   </div>
                 )
@@ -125,18 +132,18 @@ function VlogSlugPage() {
                     {new Date(data.published_at).toLocaleDateString(undefined, {
                       month: "long",
                       day: "numeric",
-                      year: "numeric"
+                      year: "numeric",
                     })}
                   </span>
                 )}
               </div>
 
-              <h1 className="h-display mt-4 text-4xl text-ink md:text-5xl leading-tight font-extrabold">
+              <h1 className="h-display mt-4 text-2xl sm:text-4xl text-ink md:text-5xl leading-tight font-extrabold">
                 {data.title}
               </h1>
 
               {data.excerpt && (
-                <p className="mt-4 text-lg text-muted-foreground border-l-2 border-primary pl-4 py-1 italic">
+                <p className="mt-4 text-base sm:text-lg text-muted-foreground border-l-2 border-primary pl-4 py-1 italic">
                   {data.excerpt}
                 </p>
               )}
@@ -150,7 +157,7 @@ function VlogSlugPage() {
           </div>
         )}
       </article>
-      
+
       <Footer />
     </div>
   );

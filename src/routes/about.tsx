@@ -41,7 +41,7 @@ function AboutPage() {
       <section className="mx-auto max-w-4xl px-6 pt-20 pb-16 md:px-10 md:pt-32">
         <Reveal>
           <p className="eyebrow">About</p>
-          <h1 className="h-display mt-3 text-5xl text-ink md:text-6xl">
+          <h1 className="h-display mt-3 text-3xl sm:text-5xl text-ink md:text-6xl">
             A studio for startup registration, compliance and legal advisory.
           </h1>
           <p className="mt-6 max-w-2xl text-lg text-muted-foreground">
@@ -75,11 +75,12 @@ function AboutPage() {
             <div className="absolute -bottom-24 -right-24 h-48 w-48 rounded-full bg-purple-500/15 blur-[60px] pointer-events-none" />
 
             <p className="eyebrow text-primary font-medium tracking-wider">Ready when you are</p>
-            <h2 className="h-display mt-4 text-3xl font-extrabold text-foreground md:text-4xl tracking-tight leading-tight">
+            <h2 className="h-display mt-4 text-2xl sm:text-3xl md:text-4xl font-extrabold text-foreground tracking-tight leading-tight">
               Let's talk about what you're building.
             </h2>
             <p className="mt-4 max-w-xl text-muted-foreground leading-relaxed text-sm">
-              Share your startup vision or compliance needs. We'll map out a custom launch roadmap in a free 30-minute consultation.
+              Share your startup vision or compliance needs. We'll map out a custom launch roadmap
+              in a free 30-minute consultation.
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <Link

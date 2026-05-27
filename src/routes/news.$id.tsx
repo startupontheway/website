@@ -7,9 +7,7 @@ import { ChevronLeft, Calendar, BookOpen } from "lucide-react";
 
 export const Route = createFileRoute("/news/$id")({
   head: () => ({
-    meta: [
-      { title: "News Article Details — StartUpOnTheWay" },
-    ],
+    meta: [{ title: "News Article Details — StartUpOnTheWay" }],
   }),
   component: NewsDetailPage,
 });
@@ -20,10 +18,12 @@ function linkify(text: string) {
   if (/<(p|a|ul|li|strong|br|div)\b[^>]*>/i.test(text)) {
     return text;
   }
-  const urlRegex = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
-  return text.replace(urlRegex, (url) => {
-    return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline font-semibold break-all">${url}</a>`;
-  }).replace(/\n/g, "<br />");
+  const urlRegex = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gi;
+  return text
+    .replace(urlRegex, (url) => {
+      return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline font-semibold break-all">${url}</a>`;
+    })
+    .replace(/\n/g, "<br />");
 }
 
 function NewsDetailPage() {
@@ -109,7 +109,7 @@ function NewsDetailPage() {
                 </span>
               </div>
 
-              <h1 className="h-display text-2xl md:text-4xl font-extrabold leading-tight text-foreground">
+              <h1 className="h-display text-xl sm:text-3xl md:text-4xl font-extrabold leading-tight text-foreground">
                 {article.title}
               </h1>
             </div>
