@@ -569,8 +569,8 @@ function ServicesShowcase() {
 
       <div className="mt-10 sm:mt-12 grid gap-5 sm:gap-6 lg:grid-cols-[320px_1fr]">
         <Reveal>
-          <div className="rounded-2xl border border-border/80 bg-card/60 backdrop-blur-sm p-2 shadow-card space-y-0.5 sm:space-y-1">
-            {servicesList.map((s) => {
+          <div className="rounded-2xl border border-border/80 bg-card/60 backdrop-blur-sm p-2 shadow-card flex flex-col space-y-0.5 sm:space-y-1">
+            {servicesList.slice(0, 6).map((s) => {
               const isActive = s.slug === active;
               return (
                 <button
@@ -589,6 +589,17 @@ function ServicesShowcase() {
                 </button>
               );
             })}
+            
+            {servicesList.length > 6 && (
+              <div className="pt-2 mt-auto">
+                <Link
+                  to="/services"
+                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary/10 text-primary px-3.5 py-2.5 sm:px-4 sm:py-3.5 text-xs sm:text-sm font-semibold hover:bg-primary hover:text-primary-foreground transition-all duration-300"
+                >
+                  See All Services <ArrowRight className="h-3.5 w-3.5" />
+                </Link>
+              </div>
+            )}
           </div>
         </Reveal>
 

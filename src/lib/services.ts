@@ -1,3 +1,10 @@
+export interface ServiceCategory {
+  id: string;
+  name: string;
+  slug: string;
+  order_index: number;
+}
+
 export interface ServiceItem {
   id?: string;
   slug: string;
@@ -6,6 +13,7 @@ export interface ServiceItem {
   description: string;
   image_url?: string | null;
   process: string[];
+  category_id?: string | null;
 }
 
 export const services: ServiceItem[] = [

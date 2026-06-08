@@ -74,7 +74,7 @@ const DEFAULT_TIPS: InvestmentTip[] = [
   },
 ];
 
-type CalcTab = "sip" | "lumpsum" | "emi" | "fd";
+type CalcTab = "sip" | "lumpsum" | "emi" | "fd" | "8th_pay" | "step_up_sip" | "gst" | "income_tax" | "tds_interest" | "tds" | "ppf" | "gst_interest" | "compound_interest";
 
 function WealthCreationPage() {
   const [activeTab, setActiveTab] = useState<CalcTab>("sip");
@@ -102,6 +102,37 @@ function WealthCreationPage() {
   const [fdPrincipal, setFdPrincipal] = useState(100000);
   const [fdRate, setFdRate] = useState(7);
   const [fdYears, setFdYears] = useState(5);
+
+  // New Calculators States
+  const [stepUpAmount, setStepUpAmount] = useState(5000);
+  const [stepUpRate, setStepUpRate] = useState(10);
+  const [stepUpReturn, setStepUpReturn] = useState(12);
+  const [stepUpYears, setStepUpYears] = useState(10);
+
+  const [payBasic, setPayBasic] = useState(18000);
+
+  const [gstAmount, setGstAmount] = useState(10000);
+  const [gstRate, setGstRate] = useState(18);
+  const [gstMode, setGstMode] = useState<"add" | "remove">("add");
+
+  const [incTaxAmount, setIncTaxAmount] = useState(1000000);
+
+  const [tdsPrincipal, setTdsPrincipal] = useState(100000);
+  const [tdsRate, setTdsRate] = useState(10);
+
+  const [tdsIntAmount, setTdsIntAmount] = useState(10000);
+  const [tdsIntMonths, setTdsIntMonths] = useState(1);
+
+  const [ppfYearly, setPpfYearly] = useState(150000);
+  const [ppfYears, setPpfYears] = useState(15);
+
+  const [gstIntTax, setGstIntTax] = useState(50000);
+  const [gstIntDays, setGstIntDays] = useState(30);
+
+  const [ciPrincipal, setCiPrincipal] = useState(100000);
+  const [ciRate, setCiRate] = useState(10);
+  const [ciYears, setCiYears] = useState(5);
+  const [ciFreq, setCiFreq] = useState(1);
 
   useEffect(() => {
     fetchTips();
@@ -177,6 +208,62 @@ function WealthCreationPage() {
     return { investedAmount, interestEarned, maturityValue };
   };
 
+  const getStepUpSipResult = () => {
+    let totalInvested = 0;
+    let currentSip = stepUpAmount;
+    let totalValue = 0;
+    const monthlyRate = stepUpReturn / 12 / 100;
+    for (let y = 1; y <= stepUpYears; y++) {
+      for (let m = 1; m <= 12; m++) {
+        totalInvested += currentSip;
+        totalValue = (totalValue + currentSip) * (1 + monthlyRate);
+      }
+      currentSip = currentSip * (1 + stepUpRate / 100);
+    }
+    return { investedAmount: totalInvested, estimatedReturns: Math.max(0, totalValue - totalInvested), totalValue };
+  };
+
+  const get8thPay = () => payBasic * 1.92;
+
+  const getGstResult = () => {
+    if (gstMode === "add") {
+      const tax = gstAmount * (gstRate / 100);
+      return { cgst: tax / 2, sgst: tax / 2, total: gstAmount + tax };
+    } else {
+      const tax = gstAmount - (gstAmount * (100 / (100 + gstRate)));
+      return { cgst: tax / 2, sgst: tax / 2, total: gstAmount - tax };
+    }
+  };
+
+  const getIncomeTax = () => {
+    let tax = 0;
+    const inc = incTaxAmount;
+    if (inc <= 300000) tax = 0;
+    else if (inc <= 600000) tax = (inc - 300000) * 0.05;
+    else if (inc <= 900000) tax = 15000 + (inc - 600000) * 0.1;
+    else if (inc <= 1200000) tax = 45000 + (inc - 900000) * 0.15;
+    else if (inc <= 1500000) tax = 90000 + (inc - 1200000) * 0.2;
+    else tax = 150000 + (inc - 1500000) * 0.3;
+    if (inc <= 700000) tax = 0;
+    const cess = tax * 0.04;
+    return tax + cess;
+  };
+
+  const getTdsResult = () => tdsPrincipal * (tdsRate / 100);
+  const getTdsInterest = () => tdsIntAmount * 0.015 * tdsIntMonths;
+  
+  const getPpfResult = () => {
+    let bal = 0;
+    const r = 7.1 / 100;
+    for (let i = 0; i < ppfYears; i++) {
+      bal = (bal + ppfYearly) * (1 + r);
+    }
+    return { investedAmount: ppfYearly * ppfYears, estimatedReturns: Math.max(0, bal - (ppfYearly * ppfYears)), totalValue: bal };
+  };
+
+  const getGstInterest = () => gstIntTax * (18 / 100) * (gstIntDays / 365);
+  const getCiResult = () => ciPrincipal * Math.pow(1 + (ciRate / 100) / ciFreq, ciFreq * ciYears);
+
   // Filter tips
   const categoriesList = ["All", ...Array.from(new Set(tips.map((t) => t.category)))];
   const filteredTips = tips.filter((tip) => {
@@ -224,15 +311,24 @@ function WealthCreationPage() {
               <div className="flex flex-wrap gap-2 border-b border-border pb-6 mb-6">
                 {[
                   { id: "sip", label: "SIP Calculator", icon: Coins },
+                  { id: "step_up_sip", label: "Step Up SIP", icon: TrendingUp },
                   { id: "lumpsum", label: "Lumpsum", icon: Wallet },
-                  { id: "emi", label: "Loan EMI", icon: Percent },
+                  { id: "emi", label: "HDFC Home Loan EMI", icon: Percent },
                   { id: "fd", label: "Fixed Deposit", icon: Calendar },
-                ].map((item) => {
+                  { id: "ppf", label: "PPF Calculator", icon: TrendingUp },
+                  { id: "compound_interest", label: "Compound Interest", icon: TrendingUp },
+                  { id: "gst", label: "GST Calculator", icon: Percent },
+                  { id: "income_tax", label: "Income Tax", icon: Wallet },
+                  { id: "tds", label: "TDS Calculator", icon: Percent },
+                  { id: "tds_interest", label: "TDS Interest", icon: Calendar },
+                  { id: "gst_interest", label: "GST Interest", icon: Calendar },
+                  { id: "8th_pay", label: "8th Pay Commission", icon: Wallet },
+                ].map((item, idx) => {
                   const Icon = item.icon;
                   const isActive = activeTab === item.id;
                   return (
                     <button
-                      key={item.id}
+                      key={item.id + idx}
                       onClick={() => setActiveTab(item.id as CalcTab)}
                       className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-semibold transition-all cursor-pointer ${
                         isActive
@@ -754,6 +850,165 @@ function WealthCreationPage() {
                   </div>
                 </div>
               )}
+
+              {/* Tab: Step Up SIP */}
+              {activeTab === "step_up_sip" && (
+                <div className="grid gap-8 md:grid-cols-2">
+                  <div className="space-y-6">
+                    <div className="space-y-2"><div className="flex justify-between text-sm font-semibold"><span>Initial SIP</span><span className="text-primary">{formatINR(stepUpAmount)}</span></div><input type="range" min="1000" max="100000" step="1000" value={stepUpAmount} onChange={(e) => setStepUpAmount(Number(e.target.value))} className="w-full h-1.5 rounded-lg bg-muted appearance-none cursor-pointer accent-primary" /></div>
+                    <div className="space-y-2"><div className="flex justify-between text-sm font-semibold"><span>Annual Step-up (%)</span><span className="text-primary">{stepUpRate}%</span></div><input type="range" min="1" max="30" step="1" value={stepUpRate} onChange={(e) => setStepUpRate(Number(e.target.value))} className="w-full h-1.5 rounded-lg bg-muted appearance-none cursor-pointer accent-primary" /></div>
+                    <div className="space-y-2"><div className="flex justify-between text-sm font-semibold"><span>Expected Return (p.a.)</span><span className="text-primary">{stepUpReturn}%</span></div><input type="range" min="1" max="30" step="1" value={stepUpReturn} onChange={(e) => setStepUpReturn(Number(e.target.value))} className="w-full h-1.5 rounded-lg bg-muted appearance-none cursor-pointer accent-primary" /></div>
+                    <div className="space-y-2"><div className="flex justify-between text-sm font-semibold"><span>Time Period</span><span className="text-primary">{stepUpYears} Yrs</span></div><input type="range" min="1" max="40" step="1" value={stepUpYears} onChange={(e) => setStepUpYears(Number(e.target.value))} className="w-full h-1.5 rounded-lg bg-muted appearance-none cursor-pointer accent-primary" /></div>
+                  </div>
+                  <div className="flex flex-col justify-between bg-muted/20 border border-border/80 rounded-2xl p-5 md:p-6">
+                    <div className="space-y-4">
+                      <div><span className="text-[10px] font-bold text-muted-foreground uppercase block">Total Invested</span><p className="text-lg font-bold">{formatINR(getStepUpSipResult().investedAmount)}</p></div>
+                      <div><span className="text-[10px] font-bold text-muted-foreground uppercase block">Est. Returns</span><p className="text-lg font-bold text-emerald-500">+{formatINR(getStepUpSipResult().estimatedReturns)}</p></div>
+                      <div className="border-t border-border pt-4"><span className="text-[10px] font-bold text-muted-foreground uppercase block">Total Future Value</span><p className="text-2xl font-black">{formatINR(getStepUpSipResult().totalValue)}</p></div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Tab: PPF */}
+              {activeTab === "ppf" && (
+                <div className="grid gap-8 md:grid-cols-2">
+                  <div className="space-y-6">
+                    <div className="space-y-2"><div className="flex justify-between text-sm font-semibold"><span>Yearly Investment</span><span className="text-primary">{formatINR(ppfYearly)}</span></div><input type="range" min="500" max="150000" step="500" value={ppfYearly} onChange={(e) => setPpfYearly(Number(e.target.value))} className="w-full h-1.5 rounded-lg bg-muted appearance-none cursor-pointer accent-primary" /></div>
+                    <div className="space-y-2"><div className="flex justify-between text-sm font-semibold"><span>Time Period</span><span className="text-primary">{ppfYears} Yrs</span></div><input type="range" min="15" max="50" step="5" value={ppfYears} onChange={(e) => setPpfYears(Number(e.target.value))} className="w-full h-1.5 rounded-lg bg-muted appearance-none cursor-pointer accent-primary" /></div>
+                    <p className="text-xs text-muted-foreground">PPF interest rate is fixed at 7.1% p.a. by the government.</p>
+                  </div>
+                  <div className="flex flex-col justify-between bg-muted/20 border border-border/80 rounded-2xl p-5 md:p-6">
+                    <div className="space-y-4">
+                      <div><span className="text-[10px] font-bold text-muted-foreground uppercase block">Total Invested</span><p className="text-lg font-bold">{formatINR(getPpfResult().investedAmount)}</p></div>
+                      <div><span className="text-[10px] font-bold text-muted-foreground uppercase block">Est. Returns</span><p className="text-lg font-bold text-emerald-500">+{formatINR(getPpfResult().estimatedReturns)}</p></div>
+                      <div className="border-t border-border pt-4"><span className="text-[10px] font-bold text-muted-foreground uppercase block">Maturity Value</span><p className="text-2xl font-black">{formatINR(getPpfResult().totalValue)}</p></div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Tab: GST */}
+              {activeTab === "gst" && (
+                <div className="grid gap-8 md:grid-cols-2">
+                  <div className="space-y-6">
+                    <div className="space-y-2"><div className="flex justify-between text-sm font-semibold"><span>Amount</span><span className="text-primary">{formatINR(gstAmount)}</span></div><input type="range" min="1000" max="1000000" step="1000" value={gstAmount} onChange={(e) => setGstAmount(Number(e.target.value))} className="w-full h-1.5 rounded-lg bg-muted appearance-none cursor-pointer accent-primary" /></div>
+                    <div className="space-y-2"><div className="flex justify-between text-sm font-semibold"><span>GST Rate (%)</span><span className="text-primary">{gstRate}%</span></div><input type="range" min="5" max="28" step="1" value={gstRate} onChange={(e) => setGstRate(Number(e.target.value))} className="w-full h-1.5 rounded-lg bg-muted appearance-none cursor-pointer accent-primary" /></div>
+                    <div className="flex gap-4">
+                      <label className="flex items-center gap-2 text-sm"><input type="radio" checked={gstMode === "add"} onChange={() => setGstMode("add")} /> Add GST (Exclusive)</label>
+                      <label className="flex items-center gap-2 text-sm"><input type="radio" checked={gstMode === "remove"} onChange={() => setGstMode("remove")} /> Remove GST (Inclusive)</label>
+                    </div>
+                  </div>
+                  <div className="flex flex-col justify-between bg-muted/20 border border-border/80 rounded-2xl p-5 md:p-6">
+                    <div className="space-y-4">
+                      <div><span className="text-[10px] font-bold text-muted-foreground uppercase block">CGST ({(gstRate/2).toFixed(1)}%)</span><p className="text-lg font-bold">{formatINR(getGstResult().cgst)}</p></div>
+                      <div><span className="text-[10px] font-bold text-muted-foreground uppercase block">SGST ({(gstRate/2).toFixed(1)}%)</span><p className="text-lg font-bold">{formatINR(getGstResult().sgst)}</p></div>
+                      <div className="border-t border-border pt-4"><span className="text-[10px] font-bold text-muted-foreground uppercase block">{gstMode === "add" ? "Total Price" : "Base Price"}</span><p className="text-2xl font-black">{formatINR(getGstResult().total)}</p></div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Tab: Income Tax */}
+              {activeTab === "income_tax" && (
+                <div className="grid gap-8 md:grid-cols-2">
+                  <div className="space-y-6">
+                    <div className="space-y-2"><div className="flex justify-between text-sm font-semibold"><span>Annual Income</span><span className="text-primary">{formatINR(incTaxAmount)}</span></div><input type="range" min="100000" max="5000000" step="50000" value={incTaxAmount} onChange={(e) => setIncTaxAmount(Number(e.target.value))} className="w-full h-1.5 rounded-lg bg-muted appearance-none cursor-pointer accent-primary" /></div>
+                    <p className="text-xs text-muted-foreground">Calculated based on the simplified New Tax Regime (default). Assumes standard deductions and 87A rebate for income up to ₹7L.</p>
+                  </div>
+                  <div className="flex flex-col justify-between bg-muted/20 border border-border/80 rounded-2xl p-5 md:p-6">
+                    <div className="space-y-4">
+                      <div className="border-t border-border pt-4"><span className="text-[10px] font-bold text-muted-foreground uppercase block">Estimated Tax Payable (incl. cess)</span><p className="text-2xl font-black text-rose-500">{formatINR(getIncomeTax())}</p></div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Tab: TDS */}
+              {activeTab === "tds" && (
+                <div className="grid gap-8 md:grid-cols-2">
+                  <div className="space-y-6">
+                    <div className="space-y-2"><div className="flex justify-between text-sm font-semibold"><span>Invoice/Payment Amount</span><span className="text-primary">{formatINR(tdsPrincipal)}</span></div><input type="range" min="1000" max="1000000" step="1000" value={tdsPrincipal} onChange={(e) => setTdsPrincipal(Number(e.target.value))} className="w-full h-1.5 rounded-lg bg-muted appearance-none cursor-pointer accent-primary" /></div>
+                    <div className="space-y-2"><div className="flex justify-between text-sm font-semibold"><span>TDS Rate (%)</span><span className="text-primary">{tdsRate}%</span></div><input type="range" min="1" max="30" step="1" value={tdsRate} onChange={(e) => setTdsRate(Number(e.target.value))} className="w-full h-1.5 rounded-lg bg-muted appearance-none cursor-pointer accent-primary" /></div>
+                  </div>
+                  <div className="flex flex-col justify-between bg-muted/20 border border-border/80 rounded-2xl p-5 md:p-6">
+                    <div className="space-y-4">
+                      <div><span className="text-[10px] font-bold text-muted-foreground uppercase block">TDS Deducted</span><p className="text-lg font-bold text-rose-500">-{formatINR(getTdsResult())}</p></div>
+                      <div className="border-t border-border pt-4"><span className="text-[10px] font-bold text-muted-foreground uppercase block">Net Amount Receivable</span><p className="text-2xl font-black text-emerald-500">{formatINR(tdsPrincipal - getTdsResult())}</p></div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Tab: TDS Interest */}
+              {activeTab === "tds_interest" && (
+                <div className="grid gap-8 md:grid-cols-2">
+                  <div className="space-y-6">
+                    <div className="space-y-2"><div className="flex justify-between text-sm font-semibold"><span>TDS Default Amount</span><span className="text-primary">{formatINR(tdsIntAmount)}</span></div><input type="range" min="1000" max="500000" step="1000" value={tdsIntAmount} onChange={(e) => setTdsIntAmount(Number(e.target.value))} className="w-full h-1.5 rounded-lg bg-muted appearance-none cursor-pointer accent-primary" /></div>
+                    <div className="space-y-2"><div className="flex justify-between text-sm font-semibold"><span>Delay (Months or part thereof)</span><span className="text-primary">{tdsIntMonths} Months</span></div><input type="range" min="1" max="24" step="1" value={tdsIntMonths} onChange={(e) => setTdsIntMonths(Number(e.target.value))} className="w-full h-1.5 rounded-lg bg-muted appearance-none cursor-pointer accent-primary" /></div>
+                  </div>
+                  <div className="flex flex-col justify-between bg-muted/20 border border-border/80 rounded-2xl p-5 md:p-6">
+                    <div className="space-y-4">
+                      <div className="border-t border-border pt-4"><span className="text-[10px] font-bold text-muted-foreground uppercase block">Late Payment Interest (1.5% p.m.)</span><p className="text-2xl font-black text-rose-500">{formatINR(getTdsInterest())}</p></div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Tab: GST Interest */}
+              {activeTab === "gst_interest" && (
+                <div className="grid gap-8 md:grid-cols-2">
+                  <div className="space-y-6">
+                    <div className="space-y-2"><div className="flex justify-between text-sm font-semibold"><span>Tax Default Amount</span><span className="text-primary">{formatINR(gstIntTax)}</span></div><input type="range" min="1000" max="500000" step="1000" value={gstIntTax} onChange={(e) => setGstIntTax(Number(e.target.value))} className="w-full h-1.5 rounded-lg bg-muted appearance-none cursor-pointer accent-primary" /></div>
+                    <div className="space-y-2"><div className="flex justify-between text-sm font-semibold"><span>Delay (Days)</span><span className="text-primary">{gstIntDays} Days</span></div><input type="range" min="1" max="365" step="1" value={gstIntDays} onChange={(e) => setGstIntDays(Number(e.target.value))} className="w-full h-1.5 rounded-lg bg-muted appearance-none cursor-pointer accent-primary" /></div>
+                  </div>
+                  <div className="flex flex-col justify-between bg-muted/20 border border-border/80 rounded-2xl p-5 md:p-6">
+                    <div className="space-y-4">
+                      <div className="border-t border-border pt-4"><span className="text-[10px] font-bold text-muted-foreground uppercase block">Late Payment Interest (18% p.a.)</span><p className="text-2xl font-black text-rose-500">{formatINR(getGstInterest())}</p></div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Tab: Compound Interest */}
+              {activeTab === "compound_interest" && (
+                <div className="grid gap-8 md:grid-cols-2">
+                  <div className="space-y-6">
+                    <div className="space-y-2"><div className="flex justify-between text-sm font-semibold"><span>Principal</span><span className="text-primary">{formatINR(ciPrincipal)}</span></div><input type="range" min="10000" max="10000000" step="10000" value={ciPrincipal} onChange={(e) => setCiPrincipal(Number(e.target.value))} className="w-full h-1.5 rounded-lg bg-muted appearance-none cursor-pointer accent-primary" /></div>
+                    <div className="space-y-2"><div className="flex justify-between text-sm font-semibold"><span>Interest Rate (%)</span><span className="text-primary">{ciRate}%</span></div><input type="range" min="1" max="20" step="0.5" value={ciRate} onChange={(e) => setCiRate(Number(e.target.value))} className="w-full h-1.5 rounded-lg bg-muted appearance-none cursor-pointer accent-primary" /></div>
+                    <div className="space-y-2"><div className="flex justify-between text-sm font-semibold"><span>Years</span><span className="text-primary">{ciYears}</span></div><input type="range" min="1" max="50" step="1" value={ciYears} onChange={(e) => setCiYears(Number(e.target.value))} className="w-full h-1.5 rounded-lg bg-muted appearance-none cursor-pointer accent-primary" /></div>
+                    <div className="space-y-2"><div className="flex justify-between text-sm font-semibold"><span>Compounding Frequency</span><span className="text-primary">{ciFreq === 1 ? 'Yearly' : ciFreq === 12 ? 'Monthly' : 'Quarterly'}</span></div>
+                      <select value={ciFreq} onChange={e => setCiFreq(Number(e.target.value))} className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm">
+                        <option value={1}>Yearly</option>
+                        <option value={2}>Half-Yearly</option>
+                        <option value={4}>Quarterly</option>
+                        <option value={12}>Monthly</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div className="flex flex-col justify-between bg-muted/20 border border-border/80 rounded-2xl p-5 md:p-6">
+                    <div className="space-y-4">
+                      <div><span className="text-[10px] font-bold text-muted-foreground uppercase block">Total Interest</span><p className="text-lg font-bold text-emerald-500">+{formatINR(getCiResult() - ciPrincipal)}</p></div>
+                      <div className="border-t border-border pt-4"><span className="text-[10px] font-bold text-muted-foreground uppercase block">Total Future Value</span><p className="text-2xl font-black">{formatINR(getCiResult())}</p></div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Tab: 8th Pay */}
+              {activeTab === "8th_pay" && (
+                <div className="grid gap-8 md:grid-cols-2">
+                  <div className="space-y-6">
+                    <div className="space-y-2"><div className="flex justify-between text-sm font-semibold"><span>Current Basic Pay (7th CPC)</span><span className="text-primary">{formatINR(payBasic)}</span></div><input type="range" min="18000" max="250000" step="1000" value={payBasic} onChange={(e) => setPayBasic(Number(e.target.value))} className="w-full h-1.5 rounded-lg bg-muted appearance-none cursor-pointer accent-primary" /></div>
+                  </div>
+                  <div className="flex flex-col justify-between bg-muted/20 border border-border/80 rounded-2xl p-5 md:p-6">
+                    <div className="space-y-4">
+                      <div className="border-t border-border pt-4"><span className="text-[10px] font-bold text-muted-foreground uppercase block">Est. 8th CPC Basic Pay (Factor 1.92)</span><p className="text-2xl font-black text-emerald-500">{formatINR(get8thPay())}</p></div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
             </div>
           </Reveal>
 

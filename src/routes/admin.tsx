@@ -30,6 +30,7 @@ export interface NewsItem {
   title: string;
   content: string;
   image_url: string | null;
+  category_id?: string | null;
   created_at: string;
   is_marquee?: boolean;
 }
@@ -67,6 +68,13 @@ export interface Category {
   created_at: string;
 }
 
+export interface ServiceCategory {
+  id: string;
+  name: string;
+  slug: string;
+  order_index: number;
+}
+
 export interface ServiceItem {
   id?: string;
   slug: string;
@@ -74,6 +82,7 @@ export interface ServiceItem {
   short: string;
   description: string;
   image_url: string | null;
+  category_id?: string | null;
   process: string[];
   created_at?: string;
 }
@@ -230,6 +239,7 @@ function AdminPage() {
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [serviceCategories, setServiceCategories] = useState<ServiceCategory[]>([]);
   const [estimatorServices, setEstimatorServices] = useState<EstimatorService[]>([]);
   const [investmentTips, setInvestmentTips] = useState<InvestmentTip[]>([]);
   const [isLoadingData, setIsLoadingData] = useState(false);
@@ -263,7 +273,10 @@ function AdminPage() {
 
   // Services dynamic tab state
   const [servicesList, setServicesList] = useState<ServiceItem[]>([]);
-  const [serviceSubTab, setServiceSubTab] = useState<"list" | "add">("list");
+  const [serviceSubTab, setServiceSubTab] = useState<"list" | "add" | "categories">("list");
+  const [newServiceCategoryName, setNewServiceCategoryName] = useState("");
+  const [editingServiceCategoryId, setEditingServiceCategoryId] = useState<string | null>(null);
+  const [editServiceCategoryName, setEditServiceCategoryName] = useState("");
 
   // Add Service Form State
   const [newServiceName, setNewServiceName] = useState("");
@@ -271,6 +284,7 @@ function AdminPage() {
   const [newServiceShort, setNewServiceShort] = useState("");
   const [newServiceDescription, setNewServiceDescription] = useState("");
   const [newServiceImageUrl, setNewServiceImageUrl] = useState("");
+  const [newServiceCategoryId, setNewServiceCategoryId] = useState("");
   const [newServiceProcess, setNewServiceProcess] = useState<string[]>([]);
   const [newServiceStepText, setNewServiceStepText] = useState("");
   const [isUploading, setIsUploading] = useState(false);
@@ -282,6 +296,7 @@ function AdminPage() {
   const [editServiceShort, setEditServiceShort] = useState("");
   const [editServiceDescription, setEditServiceDescription] = useState("");
   const [editServiceImageUrl, setEditServiceImageUrl] = useState("");
+  const [editServiceCategoryId, setEditServiceCategoryId] = useState("");
   const [editServiceProcess, setEditServiceProcess] = useState<string[]>([]);
   const [editServiceStepText, setEditServiceStepText] = useState("");
 
@@ -418,6 +433,19 @@ function AdminPage() {
       if (catErr) throw catErr;
       setCategories(catData || []);
 
+      // 3.5 Fetch Service Categories
+      try {
+        const { data: servCatData, error: servCatErr } = await supabase
+          .from("service_categories" as any)
+          .select("*")
+          .order("order_index", { ascending: true });
+        if (!servCatErr && servCatData) {
+          setServiceCategories(servCatData as unknown as ServiceCategory[]);
+        }
+      } catch (e) {
+        console.warn("Service categories table not loaded yet.");
+      }
+
       // 4. Fetch Estimator Services
       try {
         const { data: estData, error: estErr } = await supabase
@@ -552,6 +580,47 @@ function AdminPage() {
   };
 
   // Categories Operations
+  const handleCreateServiceCategory = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newServiceCategoryName.trim()) return;
+    const slug = newServiceCategoryName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+    try {
+      const { data, error } = await supabase.from("service_categories" as any).insert({ name: newServiceCategoryName, slug }).select();
+      if (error) throw error;
+      toast.success("Service category created!");
+      if (data) setServiceCategories([...serviceCategories, ...(data as any)]);
+      setNewServiceCategoryName("");
+    } catch (err: any) { toast.error(err.message); }
+  };
+
+  const handleDeleteServiceCategory = async (id: string, name: string) => {
+    if (!confirm(`Delete parent category ${name}?`)) return;
+    try {
+      const { error } = await supabase.from("service_categories" as any).delete().eq("id", id);
+      if (error) throw error;
+      toast.success("Category deleted.");
+      setServiceCategories(serviceCategories.filter(c => c.id !== id));
+    } catch (err: any) { toast.error(err.message); }
+  };
+
+  const handleUpdateServiceCategory = async (id: string) => {
+    if (!editServiceCategoryName.trim()) return;
+    const slug = editServiceCategoryName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+    try {
+      const { data, error } = await supabase.from("service_categories" as any)
+        .update({ name: editServiceCategoryName, slug })
+        .eq("id", id)
+        .select();
+      if (error) throw error;
+      toast.success("Category updated!");
+      if (data) {
+        setServiceCategories(serviceCategories.map(c => c.id === id ? (data[0] as any) : c));
+      }
+      setEditingServiceCategoryId(null);
+      setEditServiceCategoryName("");
+    } catch (err: any) { toast.error(err.message); }
+  };
+
   const handleCreateCategory = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newCategoryName.trim()) return;
@@ -608,13 +677,14 @@ function AdminPage() {
 
     try {
       const { data, error } = await supabase
-        .from("services")
+        .from("services" as any)
         .insert({
           name: newServiceName,
           slug,
           short: newServiceShort || `${newServiceName} setup.`,
           description: newServiceDescription,
           image_url: newServiceImageUrl || null,
+          category_id: newServiceCategoryId || null,
           process: newServiceProcess,
         })
         .select();
@@ -631,6 +701,7 @@ function AdminPage() {
       setNewServiceShort("");
       setNewServiceDescription("");
       setNewServiceImageUrl("");
+      setNewServiceCategoryId("");
       setNewServiceProcess([]);
       setNewServiceStepText("");
       setServiceSubTab("list");
@@ -646,13 +717,14 @@ function AdminPage() {
 
     try {
       const { error } = await supabase
-        .from("services")
+        .from("services" as any)
         .update({
           name: editServiceName,
           slug: editServiceSlug,
           short: editServiceShort,
           description: editServiceDescription,
           image_url: editServiceImageUrl || null,
+          category_id: editServiceCategoryId || null,
           process: editServiceProcess,
         })
         .eq("id", editingService.id);
@@ -671,6 +743,7 @@ function AdminPage() {
                 short: editServiceShort,
                 description: editServiceDescription,
                 image_url: editServiceImageUrl || null,
+                category_id: editServiceCategoryId || null,
                 process: editServiceProcess,
               }
             : s,
@@ -724,6 +797,7 @@ function AdminPage() {
     setEditServiceShort(s.short);
     setEditServiceDescription(s.description);
     setEditServiceImageUrl(s.image_url || "");
+    setEditServiceCategoryId(s.category_id || "");
     setEditServiceProcess(s.process || []);
     setEditServiceStepText("");
   };
@@ -1668,6 +1742,16 @@ function AdminPage() {
                 >
                   <Plus className="inline h-3.5 w-3.5 mr-1" /> Add Service
                 </button>
+                <button
+                  onClick={() => setServiceSubTab("categories")}
+                  className={`rounded-lg px-4 py-2 text-xs font-semibold transition-all cursor-pointer ${
+                    serviceSubTab === "categories"
+                      ? "bg-primary text-primary-foreground shadow-md shadow-primary/10"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  }`}
+                >
+                  Parent Categories
+                </button>
               </div>
             </div>
 
@@ -1755,6 +1839,60 @@ function AdminPage() {
               </div>
             )}
 
+            {/* SUBTAB: CATEGORIES */}
+            {serviceSubTab === "categories" && (
+              <div className="rounded-2xl border border-border bg-card/40 backdrop-blur-sm p-6 shadow-card">
+                <h3 className="text-base font-semibold text-foreground mb-4">Manage Parent Categories</h3>
+                <form onSubmit={handleCreateServiceCategory} className="flex gap-2 max-w-sm mb-6">
+                  <input
+                    required
+                    placeholder="New Category Name"
+                    value={newServiceCategoryName}
+                    onChange={(e) => setNewServiceCategoryName(e.target.value)}
+                    className="w-full rounded-xl border border-border bg-background/50 px-4 py-2 text-sm outline-none focus:border-primary"
+                  />
+                  <button type="submit" className="rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground cursor-pointer hover:bg-primary/90">
+                    Add
+                  </button>
+                </form>
+                <div className="grid gap-3 max-w-2xl">
+                  {serviceCategories.map((c) => (
+                    <div key={c.id} className="flex items-center justify-between rounded-xl border border-border bg-background/50 p-4 hover:border-primary/50 transition-colors">
+                      {editingServiceCategoryId === c.id ? (
+                        <div className="flex items-center gap-2 w-full">
+                          <input
+                            autoFocus
+                            value={editServiceCategoryName}
+                            onChange={(e) => setEditServiceCategoryName(e.target.value)}
+                            className="flex-1 rounded-xl border border-border bg-background/50 px-3 py-1.5 text-sm outline-none focus:border-primary"
+                          />
+                          <button onClick={() => handleUpdateServiceCategory(c.id)} className="text-primary hover:text-primary/80 hover:bg-primary/10 rounded-lg px-3 py-1.5 text-xs font-semibold cursor-pointer transition-colors">Save</button>
+                          <button onClick={() => setEditingServiceCategoryId(null)} className="text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg px-3 py-1.5 text-xs font-semibold cursor-pointer transition-colors">Cancel</button>
+                        </div>
+                      ) : (
+                        <>
+                          <div className="flex gap-4 items-center">
+                            <span className="font-semibold text-sm text-foreground">{c.name}</span>
+                          </div>
+                          <div className="flex gap-1.5">
+                            <button onClick={() => { setEditingServiceCategoryId(c.id); setEditServiceCategoryName(c.name); }} className="text-primary hover:text-primary/80 hover:bg-primary/10 rounded-lg px-3 py-1.5 text-xs font-semibold cursor-pointer transition-colors">
+                              Edit
+                            </button>
+                            <button onClick={() => handleDeleteServiceCategory(c.id, c.name)} className="text-rose-500 hover:text-rose-600 hover:bg-rose-500/10 rounded-lg px-3 py-1.5 text-xs font-semibold cursor-pointer transition-colors">
+                              Delete
+                            </button>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  ))}
+                  {serviceCategories.length === 0 && (
+                    <div className="text-sm text-muted-foreground p-4">No categories found.</div>
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* SUBTAB: ADD NEW SERVICE FORM */}
             {serviceSubTab === "add" && (
               <div className="rounded-2xl border border-border bg-card/40 backdrop-blur-sm p-6 shadow-card max-w-3xl">
@@ -1780,6 +1918,22 @@ function AdminPage() {
                       placeholder="e.g. LLP Registration"
                       className="w-full rounded-xl border border-border bg-background/50 px-4 py-2.5 text-sm outline-none focus:border-primary transition-all"
                     />
+                  </div>
+
+                    <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
+                      Service Category
+                    </label>
+                    <select
+                      value={newServiceCategoryId}
+                      onChange={(e) => setNewServiceCategoryId(e.target.value)}
+                      className="w-full rounded-xl border border-border bg-background/50 px-4 py-2.5 text-sm outline-none focus:border-primary transition-all text-foreground"
+                    >
+                      <option value="">No Parent Category</option>
+                      {serviceCategories.map((c) => (
+                        <option key={c.id} value={c.id}>{c.name}</option>
+                      ))}
+                    </select>
                   </div>
 
                   <div className="space-y-1.5">
@@ -2600,6 +2754,22 @@ function AdminPage() {
                   }}
                   className="w-full rounded-xl border border-border bg-background/50 px-4 py-2.5 text-sm outline-none focus:border-primary transition-all"
                 />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
+                  Service Category
+                </label>
+                <select
+                  value={editServiceCategoryId}
+                  onChange={(e) => setEditServiceCategoryId(e.target.value)}
+                  className="w-full rounded-xl border border-border bg-background/50 px-4 py-2.5 text-sm outline-none focus:border-primary transition-all text-foreground"
+                >
+                  <option value="">No Parent Category</option>
+                  {serviceCategories.map((c) => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
+                  ))}
+                </select>
               </div>
 
               <div className="space-y-1.5">
