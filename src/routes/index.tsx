@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
-import { ArrowRight, Check, Clock, Sparkles, ShieldCheck, Users } from "lucide-react";
+import { ArrowRight, Check, Clock, Sparkles, ShieldCheck, Users , Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
@@ -60,11 +60,11 @@ function HomePage() {
     <div className="min-h-screen bg-background text-foreground">
       <Navbar />
       <Hero />
-      <TrustedRow />
       <About />
       <ServicesShowcase />
       <FeatureGrid />
       <Testimonials />
+      <FAQSection />
       <CTA />
       <Footer />
     </div>
@@ -73,7 +73,7 @@ function HomePage() {
 
 function Hero() {
   return (
-    <section className="relative overflow-hidden mx-auto max-w-7xl px-4 sm:px-6 pt-8 pb-12 sm:pb-20 md:px-10 md:pt-20 md:pb-28">
+    <section className="relative overflow-hidden mx-auto max-w-7xl px-4 sm:px-6 pt-8 pb-8 sm:pb-12 md:px-10 md:pt-20 md:pb-16">
       {/* Background Decorative Glow Blobs */}
       <div className="absolute top-10 left-1/4 -z-10 h-72 w-72 rounded-full bg-primary/10 blur-[80px]" />
       <div className="absolute top-40 right-1/4 -z-10 h-96 w-96 rounded-full bg-purple-500/10 blur-[100px]" />
@@ -87,7 +87,7 @@ function Hero() {
             className="inline-flex w-fit items-center gap-2 rounded-full border border-primary/25 bg-primary/5 px-2.5 py-1 sm:px-3 sm:py-1.5 text-[10px] sm:text-xs font-semibold text-primary"
           >
             <span className="h-1.5 w-1.5 sm:h-2 sm:w-2 rounded-full bg-primary animate-pulse" />
-            Startup registration & legal advisory
+            Expert Income Tax Return & Compliance Filing
           </motion.span>
 
           <motion.h1
@@ -96,7 +96,7 @@ function Hero() {
             transition={{ duration: 0.7, delay: 0.05 }}
             className="h-display mt-4 sm:mt-6 text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-[64px] font-bold tracking-tight text-foreground leading-[1.1]"
           >
-            Launch Your Business <br className="hidden md:block" /> The Right Way
+            File Your ITR With <br className="hidden md:block" /> Complete Confidence
           </motion.h1>
 
           <motion.p
@@ -105,8 +105,7 @@ function Hero() {
             transition={{ duration: 0.7, delay: 0.15 }}
             className="mt-4 sm:mt-6 max-w-lg text-sm sm:text-base md:text-lg text-muted-foreground leading-relaxed"
           >
-            Helping startups and businesses with registrations, compliance, taxation and legal
-            documentation — professionally managed from start to finish.
+            Helping individuals, professionals, and businesses with accurate ITR filing, tax planning, and complete compliance — managed by experts.
           </motion.p>
 
           <motion.div
@@ -130,16 +129,15 @@ function Hero() {
             className="mt-8 sm:mt-10 flex flex-nowrap items-center justify-between sm:justify-start gap-1 sm:gap-6 rounded-2xl border border-border/80 bg-card/50 backdrop-blur-sm px-3 sm:px-5 py-3.5 sm:py-4 text-[10px] xs:text-xs sm:text-sm text-muted-foreground"
           >
             <span className="flex items-center gap-1 sm:gap-2 font-medium shrink-0">
-              <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary shrink-0" /> Founders
+              <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary shrink-0" /> Individuals
             </span>
             <span className="h-3 sm:h-4 w-px bg-border shrink-0" />
             <span className="flex items-center gap-1 sm:gap-2 font-medium shrink-0">
-              <Sparkles className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary shrink-0" /> Scaling
-              Companies
+              <Sparkles className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary shrink-0" /> Professionals
             </span>
             <span className="h-3 sm:h-4 w-px bg-border shrink-0" />
             <span className="flex items-center gap-1 sm:gap-2 font-medium shrink-0">
-              <ShieldCheck className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary shrink-0" /> Enterprise
+              <ShieldCheck className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary shrink-0" /> Businesses
             </span>
           </motion.div>
         </div>
@@ -166,28 +164,28 @@ interface EstimatorService {
 
 const DEFAULT_SERVICES: EstimatorService[] = [
   {
-    key: "pvtLtd",
-    name: "Pvt Ltd Incorporation",
-    description: "Digital Signature, DIN, MoA/AoA, PAN/TAN",
-    price: 5999,
+    key: "itr1",
+    name: "ITR-1 (Salaried)",
+    description: "For individuals with income from salary, one house property, and other sources.",
+    price: 999,
   },
   {
-    key: "gst",
-    name: "GST Registration",
-    description: "Government GSTIN registration & certificate",
+    key: "itr4",
+    name: "ITR-4 (Presumptive)",
+    description: "For professionals and freelancers opting for presumptive taxation.",
+    price: 1999,
+  },
+  {
+    key: "itr3",
+    name: "ITR-3 (Business)",
+    description: "For individuals having income from business or profession.",
+    price: 3499,
+  },
+  {
+    key: "taxplan",
+    name: "Tax Planning Session",
+    description: "1-on-1 session to minimize your tax liability legally.",
     price: 1499,
-  },
-  {
-    key: "trademark",
-    name: "Trademark Application",
-    description: "Brand name, logo & legal class filing",
-    price: 4999,
-  },
-  {
-    key: "audit",
-    name: "ROC & Audit Compliance",
-    description: "Annual returns calendar & dedicated auditor",
-    price: 3999,
   },
 ];
 
@@ -195,10 +193,10 @@ function HeroWidget() {
   const [tab, setTab] = useState<"estimator" | "roadmap">("estimator");
   const [servicesList, setServicesList] = useState<EstimatorService[]>(DEFAULT_SERVICES);
   const [checkedKeys, setCheckedKeys] = useState<Record<string, boolean>>({
-    pvtLtd: true,
-    gst: true,
-    trademark: false,
-    audit: false,
+    itr1: true,
+    itr4: false,
+    itr3: false,
+    taxplan: true,
   });
 
   useEffect(() => {
@@ -208,7 +206,7 @@ function HeroWidget() {
         if (!error && data && data.length > 0) {
           const typedData = data as unknown as EstimatorService[];
           // Sort to match default keys order
-          const keysOrder = ["pvtLtd", "gst", "trademark", "audit"];
+          const keysOrder = ["itr1", "itr4", "itr3", "taxplan"];
           const sorted = [...typedData].sort(
             (a, b) => keysOrder.indexOf(a.key) - keysOrder.indexOf(b.key),
           );
@@ -371,110 +369,20 @@ function HeroWidget() {
   );
 }
 
-function TrustedRow() {
-  const [marqueeNews, setMarqueeNews] = useState<any[]>([]);
 
-  useEffect(() => {
-    async function loadMarqueeNews() {
-      try {
-        const { data, error } = await supabase
-          .from("news" as any)
-          .select("id, title")
-          .eq("is_marquee", true)
-          .order("created_at", { ascending: false });
-        if (!error && data) {
-          setMarqueeNews(data);
-        }
-      } catch (e) {
-        console.warn("Error fetching marquee news:", e);
-      }
-    }
-    loadMarqueeNews();
-  }, []);
-
-  // If no marquee articles are set yet, we show a default placeholder strip
-  const itemsToRender =
-    marqueeNews.length > 0
-      ? marqueeNews
-      : [
-          {
-            id: "welcome",
-            title: "Welcome to StartUpOnTheWay! Check back for latest regulatory updates.",
-          },
-          {
-            id: "compliance",
-            title: "Incorporations, tax filings, and legal templates built for modern founders.",
-          },
-        ];
-
-  return (
-    <section className="border-y border-border bg-card/60 backdrop-blur-md overflow-hidden py-3.5 relative flex items-center h-12">
-      <style>{`
-        @keyframes marquee {
-          0% { transform: translateX(0%); }
-          100% { transform: translateX(-33.33%); }
-        }
-        .animate-marquee-custom {
-          display: flex;
-          width: max-content;
-          animation: marquee 35s linear infinite;
-        }
-        .animate-marquee-custom:hover {
-          animation-play-state: paused;
-        }
-      `}</style>
-
-      {/* Badge Overlay */}
-      <div className="absolute left-0 z-10 bg-primary px-3 sm:px-4 h-full text-[10px] sm:text-xs font-extrabold text-primary-foreground uppercase tracking-widest flex items-center shadow-lg border-r border-primary/25 select-none font-sans">
-        <span className="hidden sm:inline">Latest &nbsp;</span> Updates
-      </div>
-
-      <div className="w-full overflow-hidden whitespace-nowrap pl-[95px] sm:pl-[170px]">
-        <div className="animate-marquee-custom flex items-center gap-12 sm:gap-24 pr-12 sm:pr-24">
-          {/* Loop three times to ensure continuous marquee text on large screens */}
-          {Array.from({ length: 3 })
-            .flatMap(() => itemsToRender)
-            .map((item, idx) => {
-              const isPlaceholder = item.id === "welcome" || item.id === "compliance";
-              return isPlaceholder ? (
-                <span
-                  key={`${item.id}-${idx}`}
-                  className="inline-flex items-center gap-2 sm:gap-3.5 text-[11px] sm:text-sm font-semibold text-muted-foreground/90 select-none"
-                >
-                  <span className="h-1.5 w-1.5 rounded-full bg-primary shrink-0" />
-                  <span>{item.title}</span>
-                </span>
-              ) : (
-                <Link
-                  key={`${item.id}-${idx}`}
-                  to="/news/$id"
-                  params={{ id: item.id }}
-                  className="inline-flex items-center gap-2 sm:gap-3.5 text-[11px] sm:text-sm font-semibold text-foreground hover:text-primary transition-colors cursor-pointer group"
-                >
-                  <span className="h-1.5 w-1.5 rounded-full bg-primary shrink-0" />
-                  <span className="group-hover:underline">{item.title}</span>
-                </Link>
-              );
-            })}
-        </div>
-      </div>
-    </section>
-  );
-}
 
 function About() {
   return (
-    <section className="relative mx-auto max-w-7xl px-4 sm:px-6 py-12 sm:py-20 md:px-10 md:py-32">
+    <section className="relative mx-auto max-w-7xl px-4 sm:px-6 pt-6 pb-12 sm:pt-10 sm:pb-20 md:px-10 md:pt-16 md:pb-32">
       {/* Dynamic side glow */}
       <div className="absolute top-1/2 left-0 -z-10 h-80 w-80 rounded-full bg-primary/5 blur-[80px]" />
 
       <Reveal>
         <h2 className="h-display mx-auto max-w-3xl text-center text-2xl xs:text-3xl sm:text-4xl md:text-5xl font-bold text-foreground">
-          Comprehensive Startup & Legal Solutions Tailored To Your Needs
+          Comprehensive Tax & ITR Filing Solutions Tailored To Your Needs
         </h2>
         <p className="mx-auto mt-4 sm:mt-5 max-w-2xl text-center text-sm sm:text-base text-muted-foreground leading-relaxed">
-          With a focus on individual attention, we deliver customized strategies — empowering
-          founders and scaling companies toward sustainable growth and operational excellence.
+          With a focus on individual attention, we deliver customized strategies — empowering taxpayers, professionals, and businesses toward accurate filing and optimized tax savings.
         </p>
       </Reveal>
 
@@ -483,12 +391,12 @@ function About() {
           <article className="group rounded-2xl border border-border bg-card/60 backdrop-blur-sm p-5 sm:p-8 md:p-10 hover:border-primary/30 hover:shadow-lg transition-all duration-300">
             <p className="eyebrow text-primary/80 font-medium tracking-wider">Our Approach</p>
             <h3 className="h-display mt-2 sm:mt-3 text-xl sm:text-2xl md:text-3xl font-bold text-foreground group-hover:text-primary transition-colors duration-300">
-              A studio model for legal & compliance.
+              A proactive approach to tax compliance.
             </h3>
             <p className="mt-4 sm:mt-5 text-xs sm:text-sm text-muted-foreground leading-relaxed">
-              We pair every client with a senior advisor and a delivery team. No call-center
-              handoffs, no template answers — just clear scopes, real timelines, and visibility at
-              every step.
+              We pair every client with a senior CA and a dedicated delivery team. No call-center
+              handoffs, no template answers — just clear strategies, real timelines, and visibility at
+              every step of your filing.
             </p>
             <Link
               to="/services"
@@ -501,16 +409,16 @@ function About() {
         <Reveal delay={0.1}>
           <article className="rounded-2xl border border-border bg-card/60 backdrop-blur-sm p-5 sm:p-8 md:p-10 hover:border-primary/30 hover:shadow-lg transition-all duration-300">
             <p className="eyebrow text-primary/80 font-medium tracking-wider">
-              Why founders choose us
+              Why taxpayers choose us
             </p>
             <h3 className="h-display mt-2 sm:mt-3 text-xl sm:text-2xl md:text-3xl font-bold text-foreground">
-              Built for the way modern teams actually work.
+              Built for the way modern earners actually work.
             </h3>
             <ul className="mt-5 sm:mt-6 space-y-3 sm:space-y-4 text-xs sm:text-sm">
               {[
-                "Senior CA, CS and legal experts on every engagement",
-                "Transparent fixed pricing — no hidden retainers",
-                "Document repository and compliance calendar included",
+                "Senior CAs and tax experts on every engagement",
+                "Transparent fixed pricing — no hidden charges",
+                "Document verification and tax planning included",
                 "Status updates over WhatsApp / email, not portals",
               ].map((b) => (
                 <li key={b} className="flex items-start gap-2.5 sm:gap-3">
@@ -741,6 +649,81 @@ function Testimonials() {
             </figure>
           </Reveal>
         ))}
+      </div>
+    </section>
+  );
+}
+
+
+interface FaqItem {
+  id: string;
+  question: string;
+  answer: string;
+  order_index: number;
+}
+
+function FAQSection() {
+  const [faqs, setFaqs] = useState<FaqItem[]>([]);
+  const [openId, setOpenId] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function loadFaqs() {
+      try {
+        const { data, error } = await supabase
+          .from("faqs" as any)
+          .select("*")
+          .order("order_index", { ascending: true });
+        if (!error && data) {
+          setFaqs(data as unknown as FaqItem[]);
+        }
+      } catch (e) {
+        console.warn("Could not load FAQs", e);
+      }
+    }
+    loadFaqs();
+  }, []);
+
+  if (faqs.length === 0) return null;
+
+  return (
+    <section className="relative mx-auto max-w-7xl px-4 sm:px-6 py-12 sm:py-20 md:px-10 md:py-32">
+      <Reveal>
+        <p className="eyebrow text-center text-primary/80 font-medium tracking-wider">
+          Got Questions?
+        </p>
+        <h2 className="h-display mx-auto mt-2 sm:mt-3 max-w-2xl text-center text-xl xs:text-2xl sm:text-3xl md:text-4xl font-bold text-foreground">
+          Frequently Asked Questions
+        </h2>
+      </Reveal>
+      
+      <div className="mx-auto mt-10 sm:mt-14 max-w-3xl space-y-4">
+        {faqs.map((faq, i) => {
+          const isOpen = openId === faq.id;
+          return (
+            <Reveal key={faq.id} delay={i * 0.05}>
+              <div 
+                className="rounded-2xl border border-border/80 bg-card/60 backdrop-blur-sm overflow-hidden transition-all duration-300 hover:border-primary/20"
+              >
+                <button
+                  onClick={() => setOpenId(isOpen ? null : faq.id)}
+                  className="w-full flex items-center justify-between p-5 sm:p-6 text-left"
+                >
+                  <span className="font-semibold text-sm sm:text-base text-foreground pr-8">{faq.question}</span>
+                  <div className={`shrink-0 flex items-center justify-center w-8 h-8 rounded-full transition-transform duration-300 ${isOpen ? 'rotate-45 bg-primary text-primary-foreground' : 'bg-primary/10 text-primary'}`}>
+                    <Plus className="w-4 h-4" />
+                  </div>
+                </button>
+                <div 
+                  className={`overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'}`}
+                >
+                  <div className="p-5 sm:p-6 pt-0 text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
+                    {faq.answer}
+                  </div>
+                </div>
+              </div>
+            </Reveal>
+          );
+        })}
       </div>
     </section>
   );

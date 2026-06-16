@@ -10,30 +10,22 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WealthCreationRouteImport } from './routes/wealth-creation'
-import { Route as NewsRouteImport } from './routes/news'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as VlogsIndexRouteImport } from './routes/vlogs.index'
 import { Route as ServicesIndexRouteImport } from './routes/services.index'
-import { Route as NewsIndexRouteImport } from './routes/news.index'
 import { Route as BlogsIndexRouteImport } from './routes/blogs.index'
 import { Route as BlogIndexRouteImport } from './routes/blog.index'
 import { Route as VlogsSlugRouteImport } from './routes/vlogs.$slug'
 import { Route as ServicesSlugRouteImport } from './routes/services.$slug'
-import { Route as NewsIdRouteImport } from './routes/news.$id'
 import { Route as BlogsSlugRouteImport } from './routes/blogs.$slug'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 
 const WealthCreationRoute = WealthCreationRouteImport.update({
   id: '/wealth-creation',
   path: '/wealth-creation',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const NewsRoute = NewsRouteImport.update({
-  id: '/news',
-  path: '/news',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ContactRoute = ContactRouteImport.update({
@@ -66,11 +58,6 @@ const ServicesIndexRoute = ServicesIndexRouteImport.update({
   path: '/services/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const NewsIndexRoute = NewsIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => NewsRoute,
-} as any)
 const BlogsIndexRoute = BlogsIndexRouteImport.update({
   id: '/blogs/',
   path: '/blogs/',
@@ -91,11 +78,6 @@ const ServicesSlugRoute = ServicesSlugRouteImport.update({
   path: '/services/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
-const NewsIdRoute = NewsIdRouteImport.update({
-  id: '/$id',
-  path: '/$id',
-  getParentRoute: () => NewsRoute,
-} as any)
 const BlogsSlugRoute = BlogsSlugRouteImport.update({
   id: '/blogs/$slug',
   path: '/blogs/$slug',
@@ -112,16 +94,13 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/admin': typeof AdminRoute
   '/contact': typeof ContactRoute
-  '/news': typeof NewsRouteWithChildren
   '/wealth-creation': typeof WealthCreationRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/blogs/$slug': typeof BlogsSlugRoute
-  '/news/$id': typeof NewsIdRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/vlogs/$slug': typeof VlogsSlugRoute
   '/blog/': typeof BlogIndexRoute
   '/blogs/': typeof BlogsIndexRoute
-  '/news/': typeof NewsIndexRoute
   '/services/': typeof ServicesIndexRoute
   '/vlogs/': typeof VlogsIndexRoute
 }
@@ -133,12 +112,10 @@ export interface FileRoutesByTo {
   '/wealth-creation': typeof WealthCreationRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/blogs/$slug': typeof BlogsSlugRoute
-  '/news/$id': typeof NewsIdRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/vlogs/$slug': typeof VlogsSlugRoute
   '/blog': typeof BlogIndexRoute
   '/blogs': typeof BlogsIndexRoute
-  '/news': typeof NewsIndexRoute
   '/services': typeof ServicesIndexRoute
   '/vlogs': typeof VlogsIndexRoute
 }
@@ -148,16 +125,13 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/admin': typeof AdminRoute
   '/contact': typeof ContactRoute
-  '/news': typeof NewsRouteWithChildren
   '/wealth-creation': typeof WealthCreationRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/blogs/$slug': typeof BlogsSlugRoute
-  '/news/$id': typeof NewsIdRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/vlogs/$slug': typeof VlogsSlugRoute
   '/blog/': typeof BlogIndexRoute
   '/blogs/': typeof BlogsIndexRoute
-  '/news/': typeof NewsIndexRoute
   '/services/': typeof ServicesIndexRoute
   '/vlogs/': typeof VlogsIndexRoute
 }
@@ -168,16 +142,13 @@ export interface FileRouteTypes {
     | '/about'
     | '/admin'
     | '/contact'
-    | '/news'
     | '/wealth-creation'
     | '/blog/$slug'
     | '/blogs/$slug'
-    | '/news/$id'
     | '/services/$slug'
     | '/vlogs/$slug'
     | '/blog/'
     | '/blogs/'
-    | '/news/'
     | '/services/'
     | '/vlogs/'
   fileRoutesByTo: FileRoutesByTo
@@ -189,12 +160,10 @@ export interface FileRouteTypes {
     | '/wealth-creation'
     | '/blog/$slug'
     | '/blogs/$slug'
-    | '/news/$id'
     | '/services/$slug'
     | '/vlogs/$slug'
     | '/blog'
     | '/blogs'
-    | '/news'
     | '/services'
     | '/vlogs'
   id:
@@ -203,16 +172,13 @@ export interface FileRouteTypes {
     | '/about'
     | '/admin'
     | '/contact'
-    | '/news'
     | '/wealth-creation'
     | '/blog/$slug'
     | '/blogs/$slug'
-    | '/news/$id'
     | '/services/$slug'
     | '/vlogs/$slug'
     | '/blog/'
     | '/blogs/'
-    | '/news/'
     | '/services/'
     | '/vlogs/'
   fileRoutesById: FileRoutesById
@@ -222,7 +188,6 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   AdminRoute: typeof AdminRoute
   ContactRoute: typeof ContactRoute
-  NewsRoute: typeof NewsRouteWithChildren
   WealthCreationRoute: typeof WealthCreationRoute
   BlogSlugRoute: typeof BlogSlugRoute
   BlogsSlugRoute: typeof BlogsSlugRoute
@@ -241,13 +206,6 @@ declare module '@tanstack/react-router' {
       path: '/wealth-creation'
       fullPath: '/wealth-creation'
       preLoaderRoute: typeof WealthCreationRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/news': {
-      id: '/news'
-      path: '/news'
-      fullPath: '/news'
-      preLoaderRoute: typeof NewsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/contact': {
@@ -292,13 +250,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ServicesIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/news/': {
-      id: '/news/'
-      path: '/'
-      fullPath: '/news/'
-      preLoaderRoute: typeof NewsIndexRouteImport
-      parentRoute: typeof NewsRoute
-    }
     '/blogs/': {
       id: '/blogs/'
       path: '/blogs'
@@ -327,13 +278,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ServicesSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/news/$id': {
-      id: '/news/$id'
-      path: '/$id'
-      fullPath: '/news/$id'
-      preLoaderRoute: typeof NewsIdRouteImport
-      parentRoute: typeof NewsRoute
-    }
     '/blogs/$slug': {
       id: '/blogs/$slug'
       path: '/blogs/$slug'
@@ -351,24 +295,11 @@ declare module '@tanstack/react-router' {
   }
 }
 
-interface NewsRouteChildren {
-  NewsIdRoute: typeof NewsIdRoute
-  NewsIndexRoute: typeof NewsIndexRoute
-}
-
-const NewsRouteChildren: NewsRouteChildren = {
-  NewsIdRoute: NewsIdRoute,
-  NewsIndexRoute: NewsIndexRoute,
-}
-
-const NewsRouteWithChildren = NewsRoute._addFileChildren(NewsRouteChildren)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   AdminRoute: AdminRoute,
   ContactRoute: ContactRoute,
-  NewsRoute: NewsRouteWithChildren,
   WealthCreationRoute: WealthCreationRoute,
   BlogSlugRoute: BlogSlugRoute,
   BlogsSlugRoute: BlogsSlugRoute,

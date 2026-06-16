@@ -35,7 +35,7 @@ function ServicesPage() {
       try {
         const [servRes, catRes] = await Promise.all([
           supabase.from("services").select("*").order("created_at", { ascending: true }),
-          supabase.from("service_categories" as any).select("*").order("order_index", { ascending: true }),
+          supabase.from("service_categories" as any).select("*").order("created_at", { ascending: true }),
         ]);
 
         if (!servRes.error && servRes.data && servRes.data.length > 0) {

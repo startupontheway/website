@@ -22,17 +22,18 @@ import {
   X,
   Pencil,
   Coins,
-  Newspaper,
   Sparkles,
+  HelpCircle,
 } from "lucide-react";
-export interface NewsItem {
+
+
+
+export interface FaqItem {
   id: string;
-  title: string;
-  content: string;
-  image_url: string | null;
-  category_id?: string | null;
+  question: string;
+  answer: string;
+  order_index: number;
   created_at: string;
-  is_marquee?: boolean;
 }
 
 export interface Lead {
@@ -139,7 +140,7 @@ const DEFAULT_TIPS: InvestmentTip[] = [
   },
 ];
 
-type Tab = "overview" | "leads" | "blogs" | "services" | "estimator" | "tips" | "news";
+type Tab = "overview" | "leads" | "blogs" | "services" | "estimator" | "tips" | "faqs";
 
 const DEFAULT_ESTIMATOR_SERVICES: EstimatorService[] = [
   {
@@ -251,15 +252,13 @@ function AdminPage() {
   const [selectedTip, setSelectedTip] = useState<InvestmentTip | null>(null);
   const [editingTip, setEditingTip] = useState<InvestmentTip | null>(null);
 
-  // News Form States
-  const [newsList, setNewsList] = useState<NewsItem[]>([]);
-  const [newNewsTitle, setNewNewsTitle] = useState("");
-  const [newNewsContent, setNewNewsContent] = useState("");
-  const [newNewsImageUrl, setNewNewsImageUrl] = useState("");
-  const [isUploadingNewsImage, setIsUploadingNewsImage] = useState(false);
-  const [selectedNews, setSelectedNews] = useState<NewsItem | null>(null);
-  const [editingNews, setEditingNews] = useState<NewsItem | null>(null);
-  const [newNewsIsMarquee, setNewNewsIsMarquee] = useState(false);
+  // FAQ States
+  const [faqs, setFaqs] = useState<FaqItem[]>([]);
+  const [newFaqQuestion, setNewFaqQuestion] = useState("");
+  const [newFaqAnswer, setNewFaqAnswer] = useState("");
+  const [newFaqOrder, setNewFaqOrder] = useState<number>(0);
+  const [editingFaq, setEditingFaq] = useState<FaqItem | null>(null);
+
 
   // Creation Form States
   const [newCategoryName, setNewCategoryName] = useState("");
@@ -343,10 +342,7 @@ function AdminPage() {
         console.log("Realtime services update received:", payload);
         fetchDashboardData(true); // Silent update in background!
       })
-      .on("postgres_changes", { event: "*", schema: "public", table: "news" }, (payload) => {
-        console.log("Realtime news update received:", payload);
-        fetchDashboardData(true); // Silent update in background!
-      })
+      
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "investment_tips" },
@@ -355,6 +351,15 @@ function AdminPage() {
           fetchDashboardData(true); // Silent update in background!
         },
       )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "faqs" },
+        (payload) => {
+          console.log("Realtime faqs update received:", payload);
+          fetchDashboardData(true);
+        },
+      )
+
       .subscribe();
 
     return () => {
@@ -438,7 +443,7 @@ function AdminPage() {
         const { data: servCatData, error: servCatErr } = await supabase
           .from("service_categories" as any)
           .select("*")
-          .order("order_index", { ascending: true });
+          .order("created_at", { ascending: true });
         if (!servCatErr && servCatData) {
           setServiceCategories(servCatData as unknown as ServiceCategory[]);
         }
@@ -497,21 +502,21 @@ function AdminPage() {
         setInvestmentTips(DEFAULT_TIPS);
       }
 
-      // 7. Fetch News
+      
+    
+      // 8. Fetch FAQs
       try {
-        const { data: newsData, error: newsErr } = await supabase
-          .from("news" as any)
+        const { data: faqData, error: faqErr } = await supabase
+          .from("faqs" as any)
           .select("*")
-          .order("created_at", { ascending: false });
-        if (!newsErr && newsData && newsData.length > 0) {
-          setNewsList(newsData as unknown as NewsItem[]);
-        } else {
-          setNewsList([]);
+          .order("order_index", { ascending: true });
+        if (!faqErr && faqData) {
+          setFaqs(faqData as unknown as FaqItem[]);
         }
       } catch (e) {
-        console.warn("News table not loaded yet or empty.", e);
-        setNewsList([]);
+        console.warn("FAQs table not loaded yet.", e);
       }
+
     } catch (err) {
       console.error(err);
       if (!silent) {
@@ -521,6 +526,68 @@ function AdminPage() {
     } finally {
       if (!silent) setIsLoadingData(false);
     }
+  };
+
+  
+  // FAQ Operations
+  const handleCreateFaq = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newFaqQuestion.trim() || !newFaqAnswer.trim()) return;
+    try {
+      const { error } = await supabase.from("faqs" as any).insert({
+        question: newFaqQuestion,
+        answer: newFaqAnswer,
+        order_index: newFaqOrder,
+      });
+      if (error) throw error;
+      toast.success("FAQ added successfully!");
+      setNewFaqQuestion("");
+      setNewFaqAnswer("");
+      setNewFaqOrder(0);
+    } catch (err) {
+      const error = err as Error;
+      toast.error(error.message);
+    }
+  };
+
+  const handleUpdateFaq = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingFaq) return;
+    try {
+      const { error } = await supabase.from("faqs" as any).update({
+        question: newFaqQuestion,
+        answer: newFaqAnswer,
+        order_index: newFaqOrder,
+      }).eq("id", editingFaq.id);
+      if (error) throw error;
+      toast.success("FAQ updated!");
+      setEditingFaq(null);
+      setNewFaqQuestion("");
+      setNewFaqAnswer("");
+      setNewFaqOrder(0);
+    } catch (err) {
+      const error = err as Error;
+      toast.error(error.message);
+    }
+  };
+
+  const handleDeleteFaq = async (id: string) => {
+    if (!confirm("Delete this FAQ?")) return;
+    try {
+      const { error } = await supabase.from("faqs" as any).delete().eq("id", id);
+      if (error) throw error;
+      toast.success("FAQ deleted.");
+    } catch (err) {
+      const error = err as Error;
+      toast.error(error.message);
+    }
+  };
+
+  const startEditFaq = (f: FaqItem) => {
+    setEditingFaq(f);
+    setNewFaqQuestion(f.question);
+    setNewFaqAnswer(f.answer);
+    setNewFaqOrder(f.order_index);
   };
 
   // Leads Operations
@@ -1085,113 +1152,6 @@ function AdminPage() {
   };
 
   // News Operations
-  const handleCreateNews = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newNewsTitle.trim() || !newNewsContent.trim()) {
-      toast.error("Please fill in all required fields.");
-      return;
-    }
-
-    try {
-      const { data, error } = await supabase
-        .from("news" as any)
-        .insert({
-          title: newNewsTitle,
-          content: newNewsContent,
-          image_url: newNewsImageUrl || null,
-          is_marquee: newNewsIsMarquee,
-        })
-        .select();
-
-      if (error) throw error;
-      toast.success("News article published successfully!");
-      if (data) {
-        setNewsList([...newsList, ...(data as unknown as NewsItem[])]);
-      }
-
-      // Reset form
-      setNewNewsTitle("");
-      setNewNewsContent("");
-      setNewNewsImageUrl("");
-      setNewNewsIsMarquee(false);
-    } catch (err) {
-      const error = err as Error;
-      toast.error(error.message);
-    }
-  };
-
-  const startEditNews = (item: NewsItem) => {
-    setEditingNews(item);
-    setNewNewsTitle(item.title);
-    setNewNewsContent(item.content);
-    setNewNewsImageUrl(item.image_url || "");
-    setNewNewsIsMarquee(item.is_marquee || false);
-  };
-
-  const cancelEditNews = () => {
-    setEditingNews(null);
-    setNewNewsTitle("");
-    setNewNewsContent("");
-    setNewNewsImageUrl("");
-    setNewNewsIsMarquee(false);
-  };
-
-  const handleUpdateNews = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editingNews) return;
-    if (!newNewsTitle.trim() || !newNewsContent.trim()) {
-      toast.error("Please fill in all required fields.");
-      return;
-    }
-
-    try {
-      // Database update
-      const { data, error } = await supabase
-        .from("news" as any)
-        .update({
-          title: newNewsTitle,
-          content: newNewsContent,
-          image_url: newNewsImageUrl || null,
-          is_marquee: newNewsIsMarquee,
-        })
-        .eq("id", editingNews.id)
-        .select();
-
-      if (error) throw error;
-      toast.success("News article updated successfully!");
-      if (data) {
-        setNewsList(
-          newsList.map((n) => (n.id === editingNews.id ? (data[0] as unknown as NewsItem) : n)),
-        );
-      }
-
-      setEditingNews(null);
-      setNewNewsTitle("");
-      setNewNewsContent("");
-      setNewNewsImageUrl("");
-      setNewNewsIsMarquee(false);
-    } catch (err) {
-      const error = err as Error;
-      toast.error(error.message);
-    }
-  };
-
-  const handleDeleteNews = async (newsId: string, newsTitle: string) => {
-    if (!confirm(`Are you sure you want to delete "${newsTitle}"?`)) return;
-    try {
-      const { error } = await supabase
-        .from("news" as any)
-        .delete()
-        .eq("id", newsId);
-      if (error) throw error;
-      toast.success("News article deleted successfully.");
-      setNewsList(newsList.filter((n) => n.id !== newsId));
-    } catch (err) {
-      const error = err as Error;
-      toast.error(error.message);
-    }
-  };
-
   // ----------------------------------------------------
   // AUTH PANEL (LOGIN VIEW)
   // ----------------------------------------------------
@@ -1292,8 +1252,8 @@ function AdminPage() {
               { id: "blogs", label: "Vlog Editor", icon: FileText, badge: blogs.length },
               { id: "services", label: "Services", icon: Grid, badge: servicesList.length },
               { id: "tips", label: "Wealth Tips", icon: Coins, badge: investmentTips.length },
-              { id: "news", label: "News Editor", icon: Newspaper, badge: newsList.length },
-            ].map((tabItem) => {
+              { id: "faqs", label: "FAQ Editor", icon: HelpCircle, badge: faqs.length },
+              ].map((tabItem) => {
               const IconComp = tabItem.icon;
               const isActive = activeTab === tabItem.id;
               return (
@@ -2232,206 +2192,67 @@ function AdminPage() {
           </div>
         )}
 
+        
         {/* ----------------------------------------------------
-            TAB VIEW: NEWS (COMPANY NEWS & INSIGHTS)
+            TAB VIEW: FAQS
             ---------------------------------------------------- */}
-        {activeTab === "news" && (
+        {activeTab === "faqs" && (
           <div className="grid gap-8 lg:grid-cols-[1fr_400px]">
-            {/* Create/Edit News Form */}
+            {/* Create/Edit FAQ Form */}
             <div className="rounded-2xl border border-border bg-card/40 backdrop-blur-sm p-6 shadow-card space-y-6">
               <div>
                 <h3 className="text-base font-semibold text-foreground">
-                  {editingNews ? `Edit News: ${editingNews.title}` : "Publish News Article"}
+                  {editingFaq ? "Edit FAQ" : "Add New FAQ"}
                 </h3>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  {editingNews
-                    ? "Modify the title, image/thumbnail, or main content of this news article."
-                    : "Add regulatory announcements, business insights, or tax alerts for the News page."}
-                </p>
               </div>
-
-              <form
-                onSubmit={editingNews ? handleUpdateNews : handleCreateNews}
-                className="space-y-4"
-              >
+              <form onSubmit={editingFaq ? handleUpdateFaq : handleCreateFaq} className="space-y-4">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
-                    Article Title <span className="text-primary">*</span>
-                  </label>
-                  <input
-                    required
-                    value={newNewsTitle}
-                    onChange={(e) => setNewNewsTitle(e.target.value)}
-                    placeholder="e.g. RBI Changes Repo Rate: Implications for Startups"
-                    className="w-full rounded-xl border border-border bg-background/50 px-4 py-2.5 text-sm outline-none focus:border-primary transition-all"
-                  />
+                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">Question *</label>
+                  <input required value={newFaqQuestion} onChange={(e) => setNewFaqQuestion(e.target.value)} className="w-full rounded-xl border border-border bg-background/50 px-4 py-2.5 text-sm outline-none focus:border-primary transition-all" />
                 </div>
-
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
-                    Thumbnail Image Option (URL or Upload)
-                  </label>
-                  <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
-                    <input
-                      value={newNewsImageUrl}
-                      onChange={(e) => setNewNewsImageUrl(e.target.value)}
-                      placeholder="https://images.unsplash.com/photo-..."
-                      className="w-full rounded-xl border border-border bg-background/50 px-4 py-2.5 text-sm outline-none focus:border-primary transition-all"
-                    />
-                    <label className="rounded-xl border border-border bg-muted/50 px-4 py-2.5 text-xs font-semibold text-foreground hover:bg-muted transition-colors cursor-pointer flex items-center justify-center">
-                      {isUploading ? "Uploading..." : "Upload File"}
-                      <input
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={(e) => handleFileUpload(e, setNewNewsImageUrl)}
-                        disabled={isUploading}
-                      />
-                    </label>
-                  </div>
+                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">Answer *</label>
+                  <textarea required value={newFaqAnswer} onChange={(e) => setNewFaqAnswer(e.target.value)} className="w-full rounded-xl border border-border bg-background/50 px-4 py-2.5 text-sm outline-none focus:border-primary transition-all min-h-[120px]" />
                 </div>
-
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
-                    Content Editor (HTML & links supported) <span className="text-primary">*</span>
-                  </label>
-                  <HtmlEditor
-                    id="newNewsContent"
-                    value={newNewsContent}
-                    setValue={setNewNewsContent}
-                    placeholder="Write detailed news content here. Plain text URLs will automatically become clickable links in the frontend!"
-                  />
+                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">Order Index</label>
+                  <input type="number" min="0" required value={newFaqOrder} onChange={(e) => setNewFaqOrder(Math.max(0, Number(e.target.value)))} className="w-full rounded-xl border border-border bg-background/50 px-4 py-2.5 text-sm outline-none focus:border-primary transition-all" />
                 </div>
-
-                <div className="flex items-center gap-3 bg-muted/20 border border-border p-3 rounded-xl">
-                  <input
-                    type="checkbox"
-                    id="newNewsIsMarquee"
-                    checked={newNewsIsMarquee}
-                    onChange={(e) => setNewNewsIsMarquee(e.target.checked)}
-                    className="h-4.5 w-4.5 rounded border-border accent-primary bg-transparent cursor-pointer"
-                  />
-                  <label
-                    htmlFor="newNewsIsMarquee"
-                    className="text-xs font-semibold text-foreground cursor-pointer select-none"
-                  >
-                    Pin/Feature in Scrolling Strip
-                    <span className="block text-[10px] text-muted-foreground font-normal mt-0.5">
-                      Check this to highlight this headline in the homepage ticker.
-                    </span>
-                  </label>
-                </div>
-
-                <div className="pt-3 border-t border-border flex justify-between gap-3">
-                  {editingNews && (
-                    <button
-                      type="button"
-                      onClick={cancelEditNews}
-                      className="rounded-full border border-border bg-background px-5 py-3 text-sm font-semibold text-muted-foreground hover:bg-muted transition-colors"
-                    >
-                      Cancel Edit
-                    </button>
+                <div className="pt-3 flex gap-3">
+                  {editingFaq && (
+                    <button type="button" onClick={() => { setEditingFaq(null); setNewFaqQuestion(""); setNewFaqAnswer(""); setNewFaqOrder(0); }} className="rounded-full border border-border bg-background px-5 py-3 text-sm font-semibold text-muted-foreground hover:bg-muted transition-colors">Cancel</button>
                   )}
-                  <button
-                    type="submit"
-                    className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-primary to-purple-600 px-6 py-3 text-sm font-semibold text-primary-foreground shadow-md shadow-primary/10 transition-transform duration-300 hover:scale-[1.01]"
-                  >
-                    {editingNews ? "Update News Article" : "Publish News Article"}
+                  <button type="submit" className="rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition-transform hover:scale-105">
+                    {editingFaq ? "Update FAQ" : "Save FAQ"}
                   </button>
                 </div>
               </form>
             </div>
-
-            {/* Published News List */}
+            
+            {/* FAQ List */}
             <div className="space-y-6">
               <div className="rounded-2xl border border-border bg-card/40 backdrop-blur-sm p-6 shadow-card">
-                <h3 className="text-base font-semibold text-foreground">
-                  Published News ({newsList.length})
-                </h3>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  View and manage current news articles displayed on the News frontend. Click to
-                  preview.
-                </p>
-
+                <h3 className="text-base font-semibold text-foreground">Published FAQs ({faqs.length})</h3>
                 <div className="space-y-3 mt-6 max-h-[600px] overflow-y-auto pr-1">
-                  {newsList.map((item) => (
-                    <div
-                      key={item.id}
-                      onClick={() => setSelectedNews(item)}
-                      className="rounded-xl border border-border bg-card/60 p-4 flex items-start justify-between gap-4 cursor-pointer hover:border-primary/30 hover:bg-card transition-all group"
-                    >
-                      <div className="min-w-0 flex-1 flex gap-3">
-                        {/* Thumbnail image mini preview */}
-                        <div className="w-10 h-10 rounded bg-muted border border-border overflow-hidden shrink-0">
-                          {item.image_url ? (
-                            <img
-                              src={item.image_url}
-                              alt=""
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center text-primary bg-primary/10">
-                              <Newspaper className="h-4.5 w-4.5" />
-                            </div>
-                          )}
+                  {faqs.map(faq => (
+                    <div key={faq.id} className="rounded-xl border border-border bg-card/60 p-4 hover:border-primary/30 transition-all">
+                      <h4 className="font-semibold text-sm">{faq.question}</h4>
+                      <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{faq.answer}</p>
+                      <div className="flex items-center justify-between mt-3 pt-3 border-t border-border/50">
+                        <span className="text-[10px] font-medium text-muted-foreground">Order: {faq.order_index}</span>
+                        <div className="flex gap-1">
+                          <button onClick={() => startEditFaq(faq)} className="p-1.5 text-primary hover:bg-primary/10 rounded"><Pencil className="w-4 h-4" /></button>
+                          <button onClick={() => handleDeleteFaq(faq.id)} className="p-1.5 text-rose-500 hover:bg-rose-500/10 rounded"><Trash2 className="w-4 h-4" /></button>
                         </div>
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-2">
-                            <h4 className="font-semibold text-xs text-foreground truncate group-hover:text-primary transition-colors">
-                              {item.title}
-                            </h4>
-                            {item.is_marquee && (
-                              <span
-                                className="rounded-full bg-primary/10 border border-primary/20 text-[9px] font-bold text-primary px-1.5 py-0.5 tracking-wider uppercase shrink-0 flex items-center gap-0.5"
-                                title="Featured in Ticker Marquee"
-                              >
-                                <Sparkles className="h-2 w-2 text-primary" /> Ticker
-                              </span>
-                            )}
-                          </div>
-                          <p className="text-[10px] text-muted-foreground mt-1">
-                            Published: {new Date(item.created_at).toLocaleDateString()}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-1 shrink-0">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            startEditNews(item);
-                          }}
-                          className="rounded-lg p-2 text-primary hover:bg-primary/10 transition-colors cursor-pointer"
-                          title="Edit Article"
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </button>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDeleteNews(item.id, item.title);
-                          }}
-                          className="rounded-lg p-2 text-rose-500 hover:bg-rose-500/10 transition-colors cursor-pointer"
-                          title="Delete Article"
-                        >
-                          <Trash2 className="h-4.5 w-4.5" />
-                        </button>
                       </div>
                     </div>
                   ))}
-
-                  {newsList.length === 0 && (
-                    <div className="text-center py-10">
-                      <Newspaper className="h-8 w-8 text-muted-foreground/60 mx-auto mb-2" />
-                      <p className="text-xs text-muted-foreground">
-                        No news articles published. Add one above!
-                      </p>
-                    </div>
-                  )}
                 </div>
               </div>
             </div>
           </div>
         )}
+
       </main>
 
       {/* Maximized view for Lead Query */}
@@ -2588,54 +2409,7 @@ function AdminPage() {
         </div>
       )}
 
-      {/* Maximized view for News Article */}
-      {selectedNews && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-md p-4 animate-fade-in">
-          <div className="w-full max-w-lg rounded-2xl border border-border bg-card p-6 shadow-2xl relative animate-scale-up max-h-[85vh] flex flex-col">
-            <button
-              onClick={() => setSelectedNews(null)}
-              className="absolute top-4 right-4 rounded-full p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors cursor-pointer"
-            >
-              <X className="h-4 w-4" />
-            </button>
-
-            <div className="flex items-center gap-3 border-b border-border pb-4 mb-5">
-              <span className="grid h-10 w-10 place-items-center rounded-xl bg-primary/10 text-primary">
-                <Newspaper className="h-5 w-5" />
-              </span>
-              <div>
-                <h3 className="text-base font-bold text-foreground">{selectedNews.title}</h3>
-                <p className="text-[10px] text-muted-foreground mt-1">
-                  Published: {new Date(selectedNews.created_at).toLocaleString("en-IN")}
-                </p>
-              </div>
-            </div>
-
-            <div className="overflow-y-auto flex-1 text-sm leading-relaxed max-h-[50vh] text-foreground/80 space-y-4 pr-1">
-              {selectedNews.image_url && (
-                <img
-                  src={selectedNews.image_url}
-                  alt={selectedNews.title}
-                  className="w-full h-40 object-cover rounded-xl border border-border"
-                />
-              )}
-              <div
-                className="prose prose-sm dark:prose-invert max-w-none text-foreground/80 leading-relaxed space-y-3"
-                dangerouslySetInnerHTML={{ __html: selectedNews.content }}
-              />
-            </div>
-
-            <div className="pt-4 border-t border-border mt-5 flex justify-end">
-              <button
-                onClick={() => setSelectedNews(null)}
-                className="rounded-xl bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground hover:opacity-90 cursor-pointer"
-              >
-                Close Preview
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      
 
       {/* Maximized view for Service details */}
       {viewingService && (

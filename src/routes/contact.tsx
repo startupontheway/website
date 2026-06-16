@@ -1,11 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
 import { Reveal } from "@/components/site/Reveal";
 import { supabase } from "@/integrations/supabase/client";
-import { services } from "@/lib/services";
+
 import { Mail, Phone, MapPin } from "lucide-react";
 
 export const Route = createFileRoute("/contact")({
@@ -24,6 +24,24 @@ export const Route = createFileRoute("/contact")({
 function ContactPage() {
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({ name: "", email: "", phone: "", service: "", message: "" });
+  const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
+
+  useEffect(() => {
+    async function loadCategories() {
+      try {
+        const { data, error } = await supabase
+          .from("service_categories" as any)
+          .select("id, name")
+          .order("created_at", { ascending: true });
+        if (!error && data) {
+          setCategories(data as unknown as { id: string; name: string }[]);
+        }
+      } catch (e) {
+        console.warn("Could not load service categories", e);
+      }
+    }
+    loadCategories();
+  }, []);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -100,9 +118,9 @@ function ContactPage() {
                   className="w-full rounded-md border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                 >
                   <option value="">Select a service</option>
-                  {services.map((s) => (
-                    <option key={s.slug} value={s.name}>
-                      {s.name}
+                  {categories.map((c) => (
+                    <option key={c.id} value={c.name}>
+                      {c.name}
                     </option>
                   ))}
                 </select>
